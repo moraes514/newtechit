@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewTechIT — Infraestrutura de TI para Empresas</title>
+  <meta name="description"
+    content="NewTechIT é especializada em infraestrutura de TI corporativa, redes, cloud e câmeras de segurança para empresas modernas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="logo" aria-label="NewTechIT">
+        <span class="logo-new">New</span><span class="logo-tech">Tech</span><span class="logo-it">IT</span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#services">Serviços</a></li>
+        <li><a href="#how-it-works">Como Funciona</a></li>
+        <li><a href="#cloud">Cloud</a></li>
+        <li><a href="#webdev">Dev Web</a></li>
+        <li><a href="#trust">Sobre</a></li>
+        <li><a href="#contact" class="btn-nav">Orçamento</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="home">
+    <div class="hero-bg">
+      <div class="hero-grid"></div>
+      <div class="hero-glow hero-glow-1"></div>
+      <div class="hero-glow hero-glow-2"></div>
+      <div class="moving-particles" id="particles"></div>
+    </div>
+    <div class="container hero-content">
+      <div class="hero-text-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          Infraestrutura de TI Corporativa
+        </div>
+        <h1 class="hero-title">
+          Conecte sua empresa ao<br />
+          <span class="gradient-text">futuro digital</span>
+        </h1>
+        <p class="hero-desc">
+          Projetamos, implementamos e gerenciamos infraestruturas de TI modernas para empresas que precisam de
+          tecnologia confiável, escalável e de alta performance.
+        </p>
+        <div class="hero-actions">
+          <a href="https://wa.me/5511916172284" target="_blank" rel="noopener" class="btn btn-primary"
+            id="btnConsultoria">Solicitar Consultoria</a>
+          <a href="#services" class="btn btn-outline" id="btnSolucoes">Conheça Nossas Soluções</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-number">100+</span>
+            <span class="stat-label">Projetos entregues</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-number">99.9%</span>
+            <span class="stat-label">Uptime garantido</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">Suporte técnico</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cloud Animation from newfinal -->
+      <div class="hero-animation">
+        <div class="cloud-container">
+          <!-- Connecting Lines -->
+          <svg class="connection-lines" viewBox="0 0 400 400">
+            <line class="connect-line line-1" x1="200" y1="200" x2="200" y2="80" />
+            <line class="connect-line line-2" x1="200" y1="200" x2="320" y2="200" />
+            <line class="connect-line line-3" x1="200" y1="200" x2="200" y2="320" />
+            <line class="connect-line line-4" x1="200" y1="200" x2="80" y2="200" />
+            <line class="connect-line line-5" x1="200" y1="200" x2="290" y2="110" />
+          </svg>
+
+          <!-- Central Cloud -->
+          <div class="cloud-center">
+            <svg viewBox="0 0 64 64" fill="currentColor">
+              <path
+                d="M52 32c0-1.4-.2-2.7-.5-4 2.2-1.8 3.5-4.5 3.5-7.5 0-5.5-4.5-10-10-10-1.3 0-2.5.2-3.6.7C39.1 7.1 34.9 4 30 4c-6.1 0-11.3 4.1-12.9 9.7C16.4 13.3 15.7 13 15 13c-4.4 0-8 3.6-8 8 0 2.5 1.2 4.8 3 6.3-.6 1.5-1 3.1-1 4.7 0 7.7 6.3 14 14 14h26c5.5 0 10-4.5 10-10 0-5.2-4-9.5-9-9.9z" />
+            </svg>
+          </div>
+
+          <!-- Orbiting Icons -->
+          <div class="orbit-icon icon-server">
+            <svg viewBox="0 0 64 64" fill="currentColor">
+              <rect x="12" y="18" width="40" height="12" rx="2" />
+              <rect x="12" y="34" width="40" height="12" rx="2" />
+              <circle cx="18" cy="24" r="2" />
+              <circle cx="18" cy="40" r="2" />
+            </svg>
+          </div>
+
+          <div class="orbit-icon icon-globe">
+            <svg viewBox="0 0 64 64" fill="currentColor">
+              <circle cx="32" cy="32" r="20" fill="none" stroke="currentColor" stroke-width="2" />
+              <ellipse cx="32" cy="32" rx="8" ry="20" fill="none" stroke="currentColor" stroke-width="2" />
+              <line x1="12" y1="32" x2="52" y2="32" stroke="currentColor" stroke-width="2" />
+              <path d="M32 12 Q38 20 38 32 T32 52" fill="none" stroke="currentColor" stroke-width="2" />
+              <path d="M32 12 Q26 20 26 32 T32 52" fill="none" stroke="currentColor" stroke-width="2" />
+            </svg>
+          </div>
+
+          <div class="orbit-icon icon-firewall">
+            <svg viewBox="0 0 64 64" fill="currentColor">
+              <path d="M32 8 L48 16 L48 32 C48 42 40 48 32 56 C24 48 16 42 16 32 L16 16 Z" fill="none"
+                stroke="currentColor" stroke-width="2" />
+              <path d="M28 28 L30 36 L34 26 L36 32" stroke="currentColor" stroke-width="2" fill="none" />
+            </svg>
+          </div>
+
+          <div class="orbit-icon icon-building">
+            <svg viewBox="0 0 64 64" fill="currentColor">
+              <rect x="20" y="12" width="24" height="40" />
+              <rect x="24" y="18" width="4" height="4" fill="#fff" />
+              <rect x="32" y="18" width="4" height="4" fill="#fff" />
+              <rect x="24" y="26" width="4" height="4" fill="#fff" />
+              <rect x="32" y="26" width="4" height="4" fill="#fff" />
+              <rect x="24" y="34" width="4" height="4" fill="#fff" />
+              <rect x="32" y="34" width="4" height="4" fill="#fff" />
+              <rect x="28" y="44" width="8" height="8" fill="#fff" />
+            </svg>
+          </div>
+
+          <div class="orbit-icon icon-user">
+            <svg viewBox="0 0 64 64" fill="currentColor">
+              <circle cx="32" cy="24" r="10" />
+              <path d="M16 52 C16 42 22 38 32 38 S48 42 48 52 Z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-hint">
+      <div class="scroll-wheel"></div>
+    </div>
+  </section>
+
+  <!-- ===== SERVICES ===== -->
+  <section class="services section-padding" id="services">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">O que fazemos</span>
+        <h2 class="section-title">Soluções completas em <span class="accent">infraestrutura</span></h2>
+        <p class="section-desc">De redes corporativas à cloud, entregamos tecnologia que sustenta o crescimento do seu
+          negócio.</p>
+      </div>
+      <div class="services-grid">
+
+        <div class="service-card" data-delay="0">
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="40" height="8" rx="2" stroke="currentColor" stroke-width="2.5" />
+              <rect x="4" y="22" width="40" height="8" rx="2" stroke="currentColor" stroke-width="2.5" />
+              <rect x="4" y="36" width="40" height="8" rx="2" stroke="currentColor" stroke-width="2.5" />
+              <circle cx="38" cy="12" r="2" fill="currentColor" />
+              <circle cx="38" cy="26" r="2" fill="currentColor" />
+              <circle cx="38" cy="40" r="2" fill="currentColor" />
+            </svg>
+          </div>
+          <h3>Infraestrutura de TI</h3>
+          <p>Montamos ambientes tecnológicos completos e robustos para sua empresa, com servidores, storage e sistemas
+            de alta disponibilidade.</p>
+          <a href="#contact" class="card-link">Saber mais <span>→</span></a>
+        </div>
+
+        <div class="service-card featured" data-delay="100">
+          <div class="card-badge">Popular</div>
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="24" cy="24" r="10" stroke="currentColor" stroke-width="2.5" />
+              <path d="M4 24h6M38 24h6M24 4v6M24 38v6" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" />
+              <path d="M9.51 9.51l4.24 4.24M34.25 34.25l4.24 4.24M9.51 38.49l4.24-4.24M34.25 13.75l4.24-4.24"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Redes Corporativas</h3>
+          <p>Instalação e configuração de redes empresariais com Wi-Fi gerenciado, cabeamento estruturado e switching
+            inteligente para máxima performance.</p>
+          <a href="#contact" class="card-link">Saber mais <span>→</span></a>
+        </div>
+
+        <div class="service-card" data-delay="200">
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 30c0-8.837 7.163-16 16-16s16 7.163 16 16" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" />
+              <path d="M2 36c0-5.523 4.477-10 10-10h24c5.523 0 10 4.477 10 10v2H2v-2z" stroke="currentColor"
+                stroke-width="2.5" />
+              <path d="M24 14V8M18 10l6-6 6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>Cloud para Empresas</h3>
+          <p>Implementação de soluções cloud com migração de dados, infraestrutura híbrida, segurança e escalabilidade
+            sob medida para o seu negócio.</p>
+          <a href="#contact" class="card-link">Saber mais <span>→</span></a>
+        </div>
+
+        <div class="service-card" data-delay="300">
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="10" width="36" height="26" rx="3" stroke="currentColor" stroke-width="2.5" />
+              <circle cx="24" cy="23" r="6" stroke="currentColor" stroke-width="2.5" />
+              <circle cx="24" cy="23" r="2" fill="currentColor" />
+              <path d="M6 32l10-8 6 5 8-7 12 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>Sistemas de Câmeras</h3>
+          <p>Instalação de câmeras de segurança IP com monitoramento remoto, gravação em nuvem e integração com o
+            sistema de TI da empresa.</p>
+          <a href="#contact" class="card-link">Saber mais <span>→</span></a>
+        </div>
+
+        <div class="service-card" data-delay="400">
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="16" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2.5" />
+              <rect x="26" y="16" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2.5" />
+              <path d="M22 24h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M13 12V8M35 12V8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="13" cy="24" r="2" fill="currentColor" />
+              <circle cx="35" cy="24" r="2" fill="currentColor" />
+            </svg>
+          </div>
+          <h3>UDM & Switches Gerenciados</h3>
+          <p>Implementação de redes com UniFi Dream Machine, switches gerenciados e orquestração centralizada para
+            ambientes corporativos exigentes.</p>
+          <a href="#contact" class="card-link">Saber mais <span>→</span></a>
+        </div>
+
+        <div class="service-card" data-delay="500">
+          <div class="card-icon-wrap">
+            <svg class="card-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M24 4l5 10 11 1.6-8 7.8 1.9 11L24 29l-9.9 5.4L16 23.4 8 15.6 19 14z" stroke="currentColor"
+                stroke-width="2.5" stroke-linejoin="round" />
+              <path d="M14 34l-8 8M34 34l8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Consultoria em TI</h3>
+          <p>Diagnóstico completo, planejamento estratégico e modernização tecnológica para empresas que querem evoluir
+            sua infraestrutura digital.</p>
+          <a href="#contact" class="card-link">Saber mais <span>→</span></a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="how-it-works section-padding dark-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header light">
+        <span class="section-tag">Processo</span>
+        <h2 class="section-title">Como trabalhamos</h2>
+        <p class="section-desc">Um processo estruturado e transparente para garantir resultados reais e duradouros.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card" data-step="01">
+          <div class="step-number">01</div>
+          <div class="step-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="2" />
+              <path d="M13 20h14M20 13v14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Diagnóstico</h3>
+          <p>Avaliamos profundamente sua infraestrutura atual, identificando gargalos, vulnerabilidades e oportunidades
+            de melhoria.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card" data-step="02">
+          <div class="step-number">02</div>
+          <div class="step-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <rect x="6" y="6" width="28" height="28" rx="3" stroke="currentColor" stroke-width="2" />
+              <path d="M12 14h16M12 20h10M12 26h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Planejamento</h3>
+          <p>Desenvolvemos um plano personalizado com cronograma, tecnologias e orçamento alinhados às necessidades do
+            seu negócio.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card" data-step="03">
+          <div class="step-number">03</div>
+          <div class="step-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <path d="M8 32L20 10l12 22" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M12 26h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Implementação</h3>
+          <p>Executamos o projeto com precisão técnica, mínimo downtime e total controle de qualidade em cada etapa da
+            instalação.</p>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-card" data-step="04">
+          <div class="step-number">04</div>
+          <div class="step-icon">
+            <svg viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="12" stroke="currentColor" stroke-width="2" />
+              <path d="M20 14v6l4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>Suporte Contínuo</h3>
+          <p>Monitoramento ativo, suporte técnico especializado e escalabilidade para acompanhar o crescimento da sua
+            empresa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CLOUD SECTION ===== -->
+  <section class="cloud-section section-padding" id="cloud">
+    <div class="container cloud-inner">
+      <div class="cloud-text">
+        <span class="section-tag">Transformação Digital</span>
+        <h2 class="section-title">Leve sua empresa para a <span class="accent">nuvem</span></h2>
+        <p>Migração segura, infraestrutura híbrida e soluções cloud escaláveis. Transformamos a tecnologia da sua
+          empresa sem interromper as operações.</p>
+        <ul class="cloud-features">
+          <li>
+            <span class="feature-icon">✦</span>
+            <div>
+              <strong>Migração para Cloud</strong>
+              <span>Transferência segura de dados, sistemas e aplicações para a nuvem.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feature-icon">✦</span>
+            <div>
+              <strong>Infraestrutura Híbrida</strong>
+              <span>Combine on-premise e cloud para máxima eficiência e controle.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feature-icon">✦</span>
+            <div>
+              <strong>Segurança e Compliance</strong>
+              <span>Proteção de dados, backups automatizados e conformidade regulatória.</span>
+            </div>
+          </li>
+          <li>
+            <span class="feature-icon">✦</span>
+            <div>
+              <strong>Escalabilidade Inteligente</strong>
+              <span>Cresça sua infraestrutura conforme a demanda, sem desperdício.</span>
+            </div>
+          </li>
+        </ul>
+        <a href="https://wa.me/5511916172284" target="_blank" rel="noopener" class="btn btn-primary"
+          id="btnCloud">Iniciar Migração Cloud</a>
+      </div>
+      <div class="cloud-visual">
+        <div class="cloud-diagram">
+          <div class="cloud-center">
+            <svg viewBox="0 0 80 60" fill="none" class="cloud-svg">
+              <path
+                d="M16 44c-6.627 0-12-5.373-12-12 0-6.075 4.518-11.1 10.376-11.9C16.15 13.76 22.628 8 30.4 8c9.057 0 16.4 7.343 16.4 16.4 0 .282-.007.563-.021.842C49.61 26.09 52 29.245 52 33c0 6.075-4.925 11-11 11H16z"
+                stroke="currentColor" stroke-width="2.5" fill="currentColor" fill-opacity="0.1" />
+            </svg>
+            <span class="cloud-label">Cloud</span>
+          </div>
+          <div class="cloud-nodes">
+            <div class="cloud-node" style="--angle: 0deg; --dist: 130px">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="4" width="24" height="24" rx="3" stroke="currentColor" stroke-width="2" />
+                <path d="M10 12h12M10 16h8M10 20h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <span>Servidores</span>
+            </div>
+            <div class="cloud-node" style="--angle: 60deg; --dist: 130px">
+              <svg viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="10" stroke="currentColor" stroke-width="2" />
+                <path d="M6 16h20M16 6c-2.5 4-4 8-4 10s1.5 6 4 10M16 6c2.5 4 4 8 4 10s-1.5 6-4 10" stroke="currentColor"
+                  stroke-width="1.5" />
+              </svg>
+              <span>Rede</span>
+            </div>
+            <div class="cloud-node" style="--angle: 120deg; --dist: 130px">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M16 4l4 8 9 1.3-6.5 6.3 1.5 9L16 24l-8 4.6 1.5-9L3 13.3 12 12z" stroke="currentColor"
+                  stroke-width="2" />
+              </svg>
+              <span>Segurança</span>
+            </div>
+            <div class="cloud-node" style="--angle: 180deg; --dist: 130px">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M10 16h12M16 16v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <span>Backup</span>
+            </div>
+            <div class="cloud-node" style="--angle: 240deg; --dist: 130px">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect x="6" y="4" width="20" height="24" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M10 10h12M10 14h8M10 18h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <span>Apps</span>
+            </div>
+            <div class="cloud-node" style="--angle: 300deg; --dist: 130px">
+              <svg viewBox="0 0 32 32" fill="none">
+                <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2" />
+                <circle cx="22" cy="22" r="6" stroke="currentColor" stroke-width="2" />
+                <path d="M16 16l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <span>Monitoramento</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== WEB DEV SECTION ===== -->
+  <section class="webdev-section section-padding dark-section" id="webdev">
+    <div class="container">
+      <div class="section-header light">
+        <span class="section-tag">Desenvolvimento Web</span>
+        <h2 class="section-title">Sites e sistemas para <span class="accent">empresas modernas</span></h2>
+        <p class="section-desc">Nossa equipe de desenvolvedores cria soluções digitais completas — do site institucional
+          ao sistema sob medida — integradas à infraestrutura de TI da sua empresa.</p>
+      </div>
+
+      <!-- Web services grid -->
+      <div class="webdev-grid">
+
+        <div class="webdev-card">
+          <div class="webdev-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="40" height="30" rx="3" stroke="currentColor" stroke-width="2.5" />
+              <path d="M4 16h40" stroke="currentColor" stroke-width="2.5" />
+              <circle cx="11" cy="12" r="2" fill="currentColor" />
+              <circle cx="17" cy="12" r="2" fill="currentColor" />
+              <path d="M16 26l6 4-6 4M26 22h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M14 42h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M24 38v4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Sites Institucionais</h3>
+          <p>Criamos sites profissionais, rápidos e responsivos que transmitem credibilidade e convertem visitantes em
+            clientes.</p>
+        </div>
+
+        <div class="webdev-card featured-card">
+          <div class="card-badge">Destaque</div>
+          <div class="webdev-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="6" width="36" height="36" rx="3" stroke="currentColor" stroke-width="2.5" />
+              <path d="M6 18h36" stroke="currentColor" stroke-width="2.5" />
+              <path d="M18 6v36" stroke="currentColor" stroke-width="2.5" />
+              <path d="M24 26l4 4-4 4M30 30h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>Sistemas Web Sob Medida</h3>
+          <p>Desenvolvemos sistemas internos, painéis de gestão, CRMs e ERPs totalmente personalizados para os processos
+            da sua empresa.</p>
+        </div>
+
+        <div class="webdev-card">
+          <div class="webdev-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 12h32v24H8z" stroke="currentColor" stroke-width="2.5" rx="2" />
+              <path d="M16 20h16M16 26h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <circle cx="36" cy="36" r="8" fill="var(--bg-dark-2)" stroke="currentColor" stroke-width="2.5" />
+              <path d="M33 36l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>E-commerce</h3>
+          <p>Lojas virtuais completas com gestão de estoque, pagamentos integrados e painel administrativo fácil de
+            usar.</p>
+        </div>
+
+        <div class="webdev-card">
+          <div class="webdev-icon">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="14" y="4" width="20" height="40" rx="3" stroke="currentColor" stroke-width="2.5" />
+              <path d="M14 10h20M14 38h20" stroke="currentColor" stroke-width="2" />
+              <circle cx="24" cy="41" r="1.5" fill="currentColor" />
+            </svg>
+          </div>
+          <h3>Aplicativos Web</h3>
+          <p>Aplicações web progressivas (PWA) que funcionam em qualquer dispositivo com experiência de app nativo.</p>
+        </div>
+
+      </div>
+
+      <!-- Team section -->
+      <div class="team-section">
+        <div class="team-header">
+          <h3>Nossa equipe de <span class="accent">desenvolvedores</span></h3>
+          <p>Profissionais experientes em desenvolvimento full-stack, com foco em performance, segurança e integração
+            com infraestrutura.</p>
+        </div>
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-avatar">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="24" r="12" stroke="currentColor" stroke-width="2.5" />
+                <path d="M8 56c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="team-info">
+              <strong>Dev Full-Stack</strong>
+              <span>React · Node.js · PostgreSQL</span>
+            </div>
+            <div class="team-tags">
+              <span>Front-end</span>
+              <span>Back-end</span>
+              <span>API</span>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="24" r="12" stroke="currentColor" stroke-width="2.5" />
+                <path d="M8 56c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="team-info">
+              <strong>Dev Web & UX</strong>
+              <span>UI/UX · HTML · CSS · JS</span>
+            </div>
+            <div class="team-tags">
+              <span>Design</span>
+              <span>Interface</span>
+              <span>SEO</span>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="24" r="12" stroke="currentColor" stroke-width="2.5" />
+                <path d="M8 56c0-13.255 10.745-24 24-24s24 10.745 24 24" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="team-info">
+              <strong>Dev Mobile & Sistemas</strong>
+              <span>Flutter · Python · DevOps</span>
+            </div>
+            <div class="team-tags">
+              <span>Mobile</span>
+              <span>Automação</span>
+              <span>Cloud</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="webdev-cta">
+        <p>Precisa de um site ou sistema? <strong>Nossa equipe cuida de tudo</strong>, da concepção ao deploy.</p>
+        <a href="https://wa.me/5511916172284" target="_blank" rel="noopener" class="btn btn-primary"
+          id="btnWebDev">Solicitar Proposta</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TRUST SECTION ===== -->
+  <section class="trust-section section-padding" id="trust">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Por que nos escolher</span>
+        <h2 class="section-title">Por que empresas confiam na <span class="accent"><span
+              class="logo-new">New</span>TechIT</span></h2>
+        <p class="section-desc">Mais do que tecnologia, entregamos tranquilidade, confiança e resultados mensuráveis.
+        </p>
+      </div>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <div class="trust-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M24 4l3.5 7 7.7 1.1-5.6 5.4 1.3 7.5L24 21.5l-6.9 3.5 1.3-7.5L12.8 12.1 20.5 11z"
+                stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
+              <path d="M10 36h28M14 42h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Tecnologia de Ponta</h3>
+          <p>Trabalhamos com as mais modernas soluções de TI, desde equipamentos Ubiquiti/UniFi até plataformas cloud
+            enterprise.</p>
+        </div>
+        <div class="trust-card">
+          <div class="trust-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M24 6l16 6v10c0 10-7 18-16 20C8 40 2 32 2 22V12l16-6z" stroke="currentColor"
+                stroke-width="2.5" />
+              <path d="M15 24l6 6 12-12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>Infraestrutura Confiável</h3>
+          <p>Projetos pensados para alta disponibilidade, redundância e segurança. Sua empresa nunca para por falha de
+            infraestrutura.</p>
+        </div>
+        <div class="trust-card">
+          <div class="trust-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <path d="M8 24c0-8.837 7.163-16 16-16s16 7.163 16 16-7.163 16-16 16S8 32.837 8 24z" stroke="currentColor"
+                stroke-width="2.5" />
+              <path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <h3>Sistemas Escaláveis</h3>
+          <p>Nossa infraestrutura cresce com o seu negócio. Não importa se você tem 5 ou 500 colaboradores, estamos
+            prontos.</p>
+        </div>
+        <div class="trust-card">
+          <div class="trust-icon">
+            <svg viewBox="0 0 48 48" fill="none">
+              <circle cx="24" cy="24" r="16" stroke="currentColor" stroke-width="2.5" />
+              <path d="M24 14v10l6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <h3>Suporte Profissional</h3>
+          <p>Equipe técnica especializada disponível para resolver problemas, fazer manutenções preventivas e garantir
+            continuidade.</p>
+        </div>
+      </div>
+
+      <!-- Testimonials -->
+      <div class="testimonials">
+        <div class="testimonial-card">
+          <div class="quote-icon">"</div>
+          <p>Dei muita sorte com Marcos! Prestador de serviços exemplar! Tem muita bagagem técnica, é muito prestativo,
+            muito rápido, muito cuidadoso e cobra preço abaixo do mercado. Ficou comigo me explicando diversos detalhes
+            com a maior paciência e sugerindo de forma honesta o melhor caminho.</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">GM</div>
+            <div>
+              <strong>Gil Meizler</strong>
+              <span class="review-stars">★★★★★ Avaliação no Google</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="quote-icon">"</div>
+          <p>Marcos é extremamente confiável e profissional. Ele identificou o problema com clareza, explicou cada
+            detalhe e resolveu tudo de forma rápida, sem que eu perdesse nenhum arquivo. Além disso, ainda recomendou a
+            melhor configuração.</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">JS</div>
+            <div>
+              <strong>Jonas Silva</strong>
+              <span class="review-stars">★★★★★ Avaliação no Google</span>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="quote-icon">"</div>
+          <p>Recomendo muito! O Marcos foi super atencioso, não mediu esforços para me responder e tirar dúvidas além de
+            ter entregado no melhor dia para mim! Fora o produto que é de excelente qualidade, muito feliz!
+            Receptividade, Qualidade, Profissionalismo, Valor.</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">FR</div>
+            <div>
+              <strong>Franklin Rocha</strong>
+              <span class="review-stars">★★★★★ Avaliação no Google</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonials-cta" style="text-align: center; margin-top: 48px;">
+        <a href="https://share.google/hChO7Q6Cl0wv4egQi" target="_blank" rel="noopener" class="btn btn-outline"
+          style="border-color: #4285F4; color: #4285F4;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"
+            style="margin-right: 8px; vertical-align: middle;">
+            <path
+              d="M12.48 10.92v3.28h7.84c-.24 1.84-.92 3.32-2.32 4.44-1.28.88-3 1.6-5.52 1.6-4.52 0-8.24-3.68-8.24-8.24s3.72-8.24 8.24-8.24c2.48 0 4.28.96 5.64 2.24l2.32-2.32C18.44 1.84 15.84 0 12.48 0 5.6 0 0 5.6 0 12.48s5.6 12.48 12.48 12.48c3.68 0 6.48-1.2 8.64-3.48 2.32-2.32 3.04-5.56 3.04-8.16 0-.6-.04-1.2-.16-1.8h-11.52z" />
+          </svg>
+          Ver todas as avaliações no Google
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT SECTION ===== -->
+  <section class="contact-section section-padding dark-section" id="contact">
+    <div class="container">
+      <div class="section-header light">
+        <span class="section-tag">Fale Conosco</span>
+        <h2 class="section-title">Pronto para modernizar sua <span class="accent">infraestrutura</span>?</h2>
+        <p class="section-desc">Entre em contato e receba uma consultoria gratuita. Nossa equipe analisará sua
+          infraestrutura atual e apresentará a melhor solução.</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg viewBox="0 0 32 32" fill="none">
+                <path d="M5.5 5.5h21v21h-21z" stroke="currentColor" stroke-width="2" rx="3" />
+                <path d="M5.5 12h21" stroke="currentColor" stroke-width="2" />
+                <circle cx="11" cy="19" r="2" fill="currentColor" />
+                <circle cx="21" cy="19" r="2" fill="currentColor" />
+              </svg>
+            </div>
+            <div>
+              <strong>WhatsApp</strong>
+              <span>Atendimento rápido pelo WhatsApp</span>
+              <a href="https://wa.me/5511916172284" class="contact-link" id="whatsappLink" target="_blank"
+                rel="noopener">Iniciar conversa →</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="8" width="24" height="16" rx="2" stroke="currentColor" stroke-width="2" />
+                <path d="M4 10l12 8 12-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div>
+              <strong>E-mail</strong>
+              <span>Envie sua dúvida por e-mail</span>
+              <a href="mailto:contato@newtechit.com.br" class="contact-link" id="emailLink">contato@newtechit.com.br</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">
+              <svg viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="14" r="5" stroke="currentColor" stroke-width="2" />
+                <path d="M27 28c0-6.075-4.925-11-11-11S5 21.925 5 28" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" />
+              </svg>
+            </div>
+            <div>
+              <strong>Consultoria Gratuita</strong>
+              <span>Agende uma análise sem compromisso</span>
+              <a href="https://wa.me/5511916172284" target="_blank" rel="noopener" class="contact-link">Agendar agora
+                →</a>
+            </div>
+          </div>
+        </div>
+
+        <form class="contact-form" id="contact-form" onsubmit="handleFormSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Nome</label>
+              <input type="text" id="name" name="name" placeholder="Seu nome" required />
+            </div>
+            <div class="form-group">
+              <label for="company">Empresa</label>
+              <input type="text" id="company" name="company" placeholder="Nome da empresa" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" placeholder="seu@email.com" required />
+            </div>
+            <div class="form-group">
+              <label for="phone">Telefone / WhatsApp</label>
+              <input type="tel" id="phone" name="phone" placeholder="(00) 00000-0000" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="service">Serviço de Interesse</label>
+            <select id="service" name="service">
+              <option value="">Selecione um serviço</option>
+              <option value="infra">Infraestrutura de TI</option>
+              <option value="rede">Redes Corporativas</option>
+              <option value="cloud">Cloud para Empresas</option>
+              <option value="web">Construção de sites</option>
+              <option value="cameras">Sistemas de Câmeras</option>
+              <option value="udm">UDM & Switches</option>
+              <option value="consultoria">Consultoria em TI</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Mensagem</label>
+            <textarea id="message" name="message" rows="4"
+              placeholder="Descreva brevemente sua necessidade..."></textarea>
+          </div>
+          <a href="https://wa.me/5511916172284" target="_blank" rel="noopener" class="btn btn-primary btn-full"
+            id="submitBtn"
+            style="text-decoration:none; display:flex; justify-content:center; align-items:center;">Solicitar
+            Consultoria Gratuita</a>
+          <div class="form-success" id="formSuccess">
+            <span>✓</span> Mensagem enviada! Entraremos em contato em breve.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="logo-new">New</span><span class="logo-tech">Tech</span><span class="logo-it">IT</span>
+        </a>
+        <p>Infraestrutura de TI moderna, confiável e escalável para empresas que querem crescer.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="LinkedIn" id="linkedinLink">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" />
+              <circle cx="4" cy="4" r="2" />
+            </svg>
+          </a>
+          <a href="#" aria-label="Instagram" id="instagramLink">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="20" rx="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Serviços</h4>
+          <ul>
+            <li><a href="#services">Infraestrutura de TI</a></li>
+            <li><a href="#services">Redes Corporativas</a></li>
+            <li><a href="#cloud">Cloud Empresarial</a></li>
+            <li><a href="#services">Sistemas de Câmeras</a></li>
+            <li><a href="#services">UDM & Switches</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="#trust">Sobre Nós</a></li>
+            <li><a href="#how-it-works">Como Funciona</a></li>
+            <li><a href="#webdev">Dev Web para Empresas</a></li>
+            <li><a href="#contact">Contato</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contato</h4>
+          <ul>
+            <li><a href="https://wa.me/5500000000000" target="_blank" rel="noopener">WhatsApp</a></li>
+            <li><a href="mailto:contato@newtechit.com.br">contato@newtechit.com.br</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>© 2025 <span class="logo-new">New</span>TechIT. Todos os direitos reservados.</span>
+        <span>Infraestrutura de TI Corporativa</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== FLOATING WHATSAPP ===== -->
+  <a href="https://wa.me/5511916172284" class="whatsapp-float" id="whatsappFloat" target="_blank" rel="noopener"
+    aria-label="Fale conosco pelo WhatsApp">
+    <svg class="wa-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#fff"
+        d="M16 2C8.268 2 2 8.268 2 16c0 2.44.652 4.726 1.79 6.7L2 30l7.494-1.764A13.937 13.937 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2z" />
+      <path fill="#25D366"
+        d="M16 4.5C9.596 4.5 4.5 9.596 4.5 16c0 2.19.603 4.24 1.652 5.993l.253.421-1.077 3.935 4.04-1.058.408.237A11.46 11.46 0 0 0 16 27.5c6.404 0 11.5-5.096 11.5-11.5S22.404 4.5 16 4.5z" />
+      <path fill="#fff"
+        d="M12.29 10.5c-.31-.69-.63-.705-.923-.717-.24-.01-.514-.01-.788-.01-.273 0-.717.103-1.092.514-.376.411-1.434 1.4-1.434 3.413 0 2.013 1.468 3.96 1.673 4.233.205.274 2.836 4.499 6.97 6.13 3.448 1.363 4.149 1.091 4.896 1.023.747-.068 2.41-.985 2.75-1.937.34-.951.34-1.768.239-1.937-.103-.17-.376-.273-.787-.479-.411-.205-2.41-1.19-2.785-1.326-.376-.136-.65-.205-.923.205-.273.41-.854 1.09-1.162 1.478-.308.376-.616.425-1.127.205-.513-.205-2.166-.798-4.126-2.545-1.525-1.36-2.556-3.04-2.856-3.55-.3-.513-.032-.79.225-1.046.231-.23.513-.6.77-.9.256-.3.34-.513.513-.855.172-.342.086-.651-.043-.94z" />
+    </svg>
+    <span class="wa-tooltip">Falar no WhatsApp</span>
+    <span class="wa-pulse"></span>
+  </a>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
