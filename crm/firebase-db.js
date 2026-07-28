@@ -9,21 +9,44 @@
 // Exporta funções para uso global nas páginas
 window.FB = (() => {
 
-  function initFirebase() {
+  async function initFirebase() {
     if (typeof firebase !== 'undefined' && !firebase.apps.length && window.FIREBASE_CONFIG) {
       firebase.initializeApp(window.FIREBASE_CONFIG);
     }
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      try {
+        const auth = firebase.auth();
+        if (!auth.currentUser) {
+          await auth.signInAnonymously();
+          console.log('✅ Firebase Auth: Conectado à nuvem');
+        }
+      } catch(e) {
+        console.warn('Firebase Auth anonymous login warning:', e);
+      }
+    }
   }
+  // Tenta conectar na carga do arquivo
+  initFirebase().catch(e => console.error(e));
 
   function getDb() {
-    initFirebase();
-    if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) {
+      if (typeof window !== 'undefined' && window.FIREBASE_CONFIG) {
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+      } else {
+        return null;
+      }
+    }
     return firebase.firestore();
   }
 
   function getAuth() {
-    initFirebase();
-    if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+    if (typeof firebase === 'undefined' || !firebase.apps.length) {
+      if (typeof window !== 'undefined' && window.FIREBASE_CONFIG) {
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+      } else {
+        return null;
+      }
+    }
     return firebase.auth();
   }
 
@@ -94,37 +117,37 @@ window.FB = (() => {
   async function getTickets() {
     const db = getDb();
     if (!db) return [];
-    const snap = await db.collection('tickets').orderBy('createdAt', 'desc').get();
-    return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    const snap = await db.collection('tickets').get();
+    const tickets = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    tickets.sort((a, b) => {
+      const getTs = x => (x.createdAt?.seconds ? x.createdAt.seconds * 1000 : (x.createdAt ? new Date(x.createdAt).getTime() : 0));
+      return getTs(b) - getTs(a);
+    });
+    return tickets;
   }
 
   async function getTicketsByCompany(company) {
     const db = getDb();
     if (!db) return [];
-    const snap = await db.collection('tickets')
-      .where('company', '==', company)
-      .orderBy('createdAt', 'desc')
-      .get();
-    return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    const snap = await db.collection('tickets').get();
+    const tickets = snap.docs.map(d => ({ ...d.data(), id: d.id })).filter(t => t.company === company);
+    return tickets;
   }
 
   async function getTicketsByClient(clientEmail) {
     const db = getDb();
     if (!db) return [];
-    const snap = await db.collection('tickets')
-      .where('clientEmail', '==', clientEmail)
-      .orderBy('createdAt', 'desc')
-      .get();
-    return snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    const snap = await db.collection('tickets').get();
+    const tickets = snap.docs.map(d => ({ ...d.data(), id: d.id })).filter(t => t.clientEmail === clientEmail || t.client === clientEmail);
+    return tickets;
   }
 
   function onTicketsChange(callback, filterEmail = null) {
     const db = getDb();
     if (!db) return () => {};
-    let query = db.collection('tickets').orderBy('createdAt', 'desc');
-    if (filterEmail) query = query.where('clientEmail', '==', filterEmail);
+    let query = db.collection('tickets');
     return query.onSnapshot(snap => {
-      const tickets = snap.docs.map(d => {
+      let tickets = snap.docs.map(d => {
         const data = d.data();
         return {
           ...data,
@@ -132,8 +155,20 @@ window.FB = (() => {
           ticketNum: data.ticketNum || d.id
         };
       });
+
+      if (filterEmail) {
+        tickets = tickets.filter(t => t.clientEmail === filterEmail || t.client === filterEmail);
+      }
+
+      // Ordena por data mais recente no JS (sem necessitar de índices compostos)
+      tickets.sort((a, b) => {
+        const getTs = x => (x.createdAt?.seconds ? x.createdAt.seconds * 1000 : (x.createdAt ? new Date(x.createdAt).getTime() : 0));
+        return getTs(b) - getTs(a);
+      });
+
+      console.log(`📥 Sincronizado com Firebase Cloud: ${tickets.length} chamado(s) recebidos.`);
       callback(tickets);
-    }, err => console.error('onTicketsChange error:', err));
+    }, err => console.error('❌ Error no listener Firestore onTicketsChange:', err));
   }
 
   async function createTicket(data, session) {

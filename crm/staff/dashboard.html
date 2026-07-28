@@ -1927,9 +1927,14 @@ function submitStaffTicket() {
       category: document.getElementById('ntCategory').value,
       priority: document.getElementById('ntPriority').value,
       status: _quickColId || 'A Fazer',
+      clientEmail: clientObj.email || '',
+      clientName: clientObj.name || '',
+      company: clientObj.company || '',
       assignee: document.getElementById('ntAssignee').value || null,
       messages: desc ? [{ from: 'client', name: clientObj.name, text: desc, time: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}), ts: Date.now() }] : []
-    }, { email: clientObj.email || clientObj.name, name: clientObj.name, company: clientObj.company }).catch(e => console.error(e));
+    }, { email: clientObj.email || clientObj.name, name: clientObj.name, company: clientObj.company })
+    .then(res => console.log('✅ Ticket criado no Firebase Cloud:', res))
+    .catch(e => console.error('❌ Erro ao salvar chamado no Firebase:', e));
   }
 
   ntMsg.style.cssText = 'display:block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#34d399;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:4px';

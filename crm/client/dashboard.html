@@ -1037,8 +1037,13 @@ function submitNewTicket() {
       category: document.getElementById('newTicketCategory').value,
       priority: document.getElementById('newTicketPriority').value,
       status: 'Aberto',
+      clientEmail: SESSION.email || '',
+      clientName: SESSION.name || '',
+      company: SESSION.company || '',
       messages: [{ from: 'client', name: SESSION.name, text: desc, time, ts: Date.now() }]
-    }, SESSION).catch(e => console.error('Firebase createTicket:', e));
+    }, SESSION)
+    .then(res => console.log('✅ Ticket do Cliente criado no Firebase:', res))
+    .catch(e => console.error('❌ Erro no Firebase createTicket:', e));
   }
 
   msgEl.style.cssText = 'display:block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#34d399;padding:10px 14px;border-radius:8px;font-size:13px';
