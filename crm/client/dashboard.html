@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NewTechIT CRM — Painel do Cliente</title>
+  <!-- Segurança: não indexar área interna -->
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https: wss:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https: wss:;" />
+  <!-- Referrer Policy -->
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../style-crm.css"/>
+  <style>
+    /* ── Client-specific styles ── */
+
+    /* Chat messages in ticket modal */
+    .chat-log {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .chat-log::-webkit-scrollbar { width: 4px; }
+    .chat-log::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .msg-bubble {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+    }
+    .msg-bubble.staff { align-self: flex-start; }
+    .msg-bubble.client { align-self: flex-end; }
+
+    .msg-meta {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .msg-bubble.client .msg-meta { text-align: right; }
+
+    .msg-text {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+    .msg-bubble.staff .msg-text {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 4px 12px 12px 12px;
+    }
+    .msg-bubble.client .msg-text {
+      background: rgba(227,6,19,0.12);
+      border: 1px solid rgba(227,6,19,0.2);
+      color: var(--text);
+      border-radius: 12px 4px 12px 12px;
+    }
+
+    /* Ticket list item */
+    .ticket-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-2);
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .ticket-item:last-child { border-bottom: none; }
+    .ticket-item:hover { background: var(--bg-hover); }
+    .ticket-item-info { flex: 1; min-width: 0; }
+    .ticket-item-title {
+      font-weight: 500;
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ticket-item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ticket-item-id {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Plan card */
+    .plan-card {
+      background: linear-gradient(135deg, rgba(227,6,19,0.08), rgba(59,130,246,0.05));
+      border: 1px solid rgba(227,6,19,0.2);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .plan-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 150px; height: 150px;
+      background: radial-gradient(circle, rgba(227,6,19,0.15), transparent 70%);
+      border-radius: 50%;
+    }
+    .plan-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .plan-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      color: var(--text-dim);
+    }
+    .plan-features li svg { color: var(--green); flex-shrink: 0; }
+    .plan-validity {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .plan-validity span { font-size: 12px; color: var(--text-muted); }
+    .plan-validity strong { font-size: 13px; color: var(--text); }
+
+    /* Upgrade cards grid */
+    .upgrade-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .upgrade-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .upgrade-card:hover { border-color: rgba(227,6,19,0.3); transform: translateY(-2px); }
+    .upgrade-card-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .upgrade-card-title { font-weight: 600; font-size: 14px; color: #fff; margin-bottom: 4px; }
+    .upgrade-card-desc  { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    .upgrade-card-cta {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--red);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Empty chat */
+    .chat-empty {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Ticket detail header */
+    .ticket-detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Priority colors in ticket list */
+    .prio-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .prio-dot.alta   { background: #f87171; }
+    .prio-dot.normal { background: var(--blue); }
+    .prio-dot.baixa  { background: var(--text-muted); }
+    .prio-dot.urgente{ background: var(--red); }
+
+    /* Chat input area */
+    .chat-input-area {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+    .chat-input-area textarea {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      min-height: 42px;
+      max-height: 120px;
+      transition: border-color .2s;
+    }
+    .chat-input-area textarea:focus {
+      border-color: var(--red);
+    }
+    .chat-input-area textarea::placeholder { color: var(--text-muted); }
+    .btn-send {
+      background: var(--red);
+      border: none;
+      border-radius: 10px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #fff;
+      flex-shrink: 0;
+      transition: background .2s, transform .1s;
+    }
+    .btn-send:hover { background: #c0020e; transform: scale(1.05); }
+    .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Realtime dot indicator */
+    .realtime-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse-dot 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.4; transform:scale(.7); }
+    }
+    select, option, .form-select, .filter-select {
+      background-color: #161c28 !important;
+      color: #f3f4f6 !important;
+    }
+    option:checked, option:hover {
+      background-color: var(--red) !important;
+      color: #ffffff !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<div class="crm-layout">
+  <aside class="crm-sidebar" id="sidebar">
+    <a class="sidebar-logo" href="#">
+      <span class="sidebar-logo-text">New<span>Tech</span>IT</span>
+    </a>
+
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarAvatar">??</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Carregando...</div>
+        <div class="user-role" id="sidebarCompany">Cliente</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Menu Principal</div>
+      <button class="nav-link active" id="nav-dashboard" onclick="navigate('dashboard')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-link" id="nav-tickets" onclick="navigate('tickets')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Meus Chamados
+        <span class="badge" id="openBadge" style="display:none"></span>
+      </button>
+      <button class="nav-link" id="nav-new-ticket" onclick="openNewTicketModal()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Abrir Chamado
+      </button>
+      <button class="nav-link" id="nav-contracts" onclick="navigate('contracts')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Serviços & Contrato
+      </button>
+      <button class="nav-link" id="nav-profile" onclick="navigate('profile')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Meu Perfil
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- ── MAIN ── -->
+  <div class="crm-main">
+    <header class="crm-header">
+      <div class="header-left">
+        <button class="btn-hamburger" onclick="toggleSidebar()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="header-page-title" id="headerTitle">Dashboard</div>
+          <div class="header-breadcrumb">Área do cliente</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary btn-sm" onclick="openNewTicketModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Chamado
+        </button>
+        <div class="header-avatar" id="headerAvatar">??</div>
+      </div>
+    </header>
+
+    <main class="crm-content">
+
+      <!-- ══ DASHBOARD TAB ══════════════════════════════════════════════ -->
+      <div class="tab-view active" id="tab-dashboard">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="kpiGrid">
+          <div class="kpi-card kpi-yellow">
+            <div class="kpi-icon yellow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="kpi-value" id="kpiAberto">0</div>
+            <div class="kpi-label">Chamados Abertos</div>
+          </div>
+          <div class="kpi-card kpi-blue">
+            <div class="kpi-icon blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </div>
+            <div class="kpi-value" id="kpiAndamento">0</div>
+            <div class="kpi-label">Em Andamento</div>
+          </div>
+          <div class="kpi-card kpi-green">
+            <div class="kpi-icon green">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="kpi-value" id="kpiResolvido">0</div>
+            <div class="kpi-label">Resolvidos</div>
+          </div>
+          <div class="kpi-card kpi-red">
+            <div class="kpi-icon red">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+            </div>
+            <div class="kpi-value" style="font-size:22px;padding-top:4px">Ativo</div>
+            <div class="kpi-label">Status da Conta</div>
+          </div>
+        </div>
+
+        <!-- Last tickets + Plan -->
+        <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start" class="dash-grid">
+
+          <!-- Recent Tickets -->
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="section-header" style="padding:18px 20px 14px;margin-bottom:0;border-bottom:1px solid var(--border)">
+              <div>
+                <div class="section-title">Últimos Chamados</div>
+                <div class="section-subtitle">Acompanhe suas solicitações</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('tickets')">Ver todos →</button>
+            </div>
+            <div id="recentTicketsList"></div>
+          </div>
+
+          <!-- Contract card -->
+          <div>
+            <div class="plan-card">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div class="plan-name">Contrato de Suporte TI</div>
+                <span class="badge badge-resolvido">Ativo</span>
+              </div>
+              <div class="plan-desc">Gestão & Suporte de Infraestrutura de TI</div>
+              <ul class="plan-features">
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
+                  Atendimento e Suporte Técnico
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
+                  Gestão de Redes e Segurança
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5"/></svg>
+                  CFTV / Câmeras de Segurança
+                </li>
+              </ul>
+              <div class="plan-validity">
+                <span>Status do Atendimento</span>
+                <strong>Regular / Ativo</strong>
+              </div>
+            </div>
+
+            <!-- Contact card -->
+            <div class="card mt-16" style="padding:18px">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                <div style="width:36px;height:36px;background:rgba(37,211,102,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#25d366;flex-shrink:0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 0C5.149 0 0 5.148 0 11.5c0 2.047.538 3.97 1.475 5.63L0 24l7.055-1.451A11.47 11.47 0 0 0 11.5 23C17.851 23 23 17.852 23 11.5S17.851 0 11.5 0z"/></svg>
+                </div>
+                <div>
+                  <div style="font-weight:600;font-size:14px;color:#fff">Suporte via WhatsApp</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Resposta em até 30 min</div>
+                </div>
+              </div>
+              <a href="https://wa.me/5511992864902?text=Olá,%20preciso%20de%20suporte" target="_blank" rel="noopener" class="btn btn-secondary" style="width:100%;justify-content:center">
+                Chamar no WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- ── end dashboard ── -->
+
+      <!-- ══ TICKETS TAB ══════════════════════════════════════════════ -->
+      <div class="tab-view" id="tab-tickets">
+        <div class="section-header mb-16">
+          <div>
+            <div class="section-title">Meus Chamados</div>
+            <div class="section-subtitle">Histórico completo de solicitações</div>
+          </div>
+          <button class="btn btn-primary" onclick="openNewTicketModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo Chamado
+          </button>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-input" type="text" id="ticketSearch" placeholder="Pesquisar chamados..." oninput="renderTicketTable()"/>
+          </div>
+          <select class="filter-select" id="ticketStatusFilter" onchange="renderTicketTable()">
+            <option value="">Todos os status</option>
+            <option>Aberto</option>
+            <option>Em Andamento</option>
+            <option>Em Revisão</option>
+            <option>Resolvido</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Título</th>
+                <th>Categoria</th>
+                <th>Prioridade</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ticketTableBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+      <!-- ── end tickets ── -->
+
+      <!-- ══ CONTRACTS TAB ══════════════════════════════════════════════ -->
+      <div class="tab-view" id="tab-contracts">
+        <div class="section-header mb-16">
+          <div>
+            <div class="section-title">Serviços & Contrato</div>
+            <div class="section-subtitle">Serviços de TI ativos e soluções disponíveis</div>
+          </div>
+        </div>
+
+        <div class="plan-card" style="max-width:700px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px">
+            <div>
+              <div class="plan-name">Contrato de Suporte & Infraestrutura TI</div>
+              <div class="plan-desc">Gestão completa de Suporte, Redes e Segurança</div>
+            </div>
+            <span class="badge badge-resolvido">Ativo</span>
+          </div>
+          <ul class="plan-features" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>Suporte técnico especializado</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>Gestão de redes e switches UniFi</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>CFTV / Câmeras de Segurança</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>Backup e segurança em nuvem</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>Visitas técnicas presenciais</li>
+            <li><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--green)"><path d="M20 6L9 17l-5-5"/></svg>VPN corporativa e segurança</li>
+          </ul>
+          <div class="plan-validity">
+            <div>
+              <span>Status do Contrato</span>
+              <strong style="display:block;margin-top:2px;color:var(--green)">Ativo / Vigente</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-24">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Serviços Disponíveis</div>
+              <div class="section-subtitle">Expanda suas soluções com a NewTechIT</div>
+            </div>
+          </div>
+          <div class="upgrade-grid">
+            <a href="https://wa.me/5511992864902?text=Olá,%20gostaria%20de%20solicitar%20o%20serviço%20de%20Gestão%20de%20Website" target="_blank" rel="noopener" class="upgrade-card" style="text-decoration:none">
+              <div class="upgrade-card-icon" style="background:rgba(59,130,246,0.1);color:var(--blue)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <div class="upgrade-card-title">Gestão de Website</div>
+              <div class="upgrade-card-desc">Manutenção, atualizações e hospedagem gerenciada do seu site.</div>
+              <div class="upgrade-card-cta">Contratar <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </a>
+            <a href="https://wa.me/5511992864902?text=Olá,%20gostaria%20de%20solicitar%20o%20serviço%20de%20Redes%20Sociais" target="_blank" rel="noopener" class="upgrade-card" style="text-decoration:none">
+              <div class="upgrade-card-icon" style="background:rgba(139,92,246,0.1);color:var(--purple)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div class="upgrade-card-title">Redes Sociais</div>
+              <div class="upgrade-card-desc">Gestão profissional de Instagram, Facebook e LinkedIn.</div>
+              <div class="upgrade-card-cta">Contratar <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </a>
+            <a href="https://wa.me/5511992864902?text=Olá,%20gostaria%20de%20solicitar%20o%20serviço%20de%20Tráfego%20Pago" target="_blank" rel="noopener" class="upgrade-card" style="text-decoration:none">
+              <div class="upgrade-card-icon" style="background:rgba(245,158,11,0.1);color:var(--yellow)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </div>
+              <div class="upgrade-card-title">Tráfego Pago</div>
+              <div class="upgrade-card-desc">Campanhas Google Ads e Meta Ads gerenciadas por especialistas.</div>
+              <div class="upgrade-card-cta">Contratar <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></div>
+            </a>
+          </div>
+        </div>
+      </div>
+      <!-- ── end contracts ── -->
+
+      <!-- ══ PROFILE TAB ══════════════════════════════════════════════ -->
+      <div class="tab-view" id="tab-profile">
+        <div class="section-header mb-16">
+          <div>
+            <div class="section-title">Meu Perfil</div>
+            <div class="section-subtitle">Informações da conta</div>
+          </div>
+        </div>
+        <div class="card" style="max-width:500px">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--red),#8B1E1E);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-size:22px;font-weight:700;color:#fff;border:3px solid rgba(227,6,19,0.3)" id="profileAvatar">??</div>
+            <div>
+              <div style="font-family:'Space Grotesk';font-size:18px;font-weight:600;color:#fff" id="profileName">—</div>
+              <div style="font-size:13px;color:var(--text-muted)" id="profileCompany">—</div>
+              <span class="badge badge-resolvido mt-4">Cliente Ativo</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nome completo <span style="color:var(--red)">*</span></label>
+            <input class="form-input" type="text" id="profileNameInput" placeholder="Digite seu nome completo..."/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" type="email" id="profileEmailInput" readonly style="opacity:0.7;cursor:not-allowed"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Empresa</label>
+            <input class="form-input" type="text" id="profileCompanyInput" readonly style="opacity:0.7;cursor:not-allowed"/>
+          </div>
+          <button class="btn btn-primary mt-16" onclick="saveProfileName()" id="btnSaveProfile" style="width:100%;justify-content:center">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Salvar Alterações
+          </button>
+          <div id="profileSaveMsg" style="display:none;margin-top:14px;padding:12px 14px;border-radius:8px;font-size:13px;text-align:center"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+<!-- end layout -->
+
+<!-- ══ MODAL: Ticket Detail ══ -->
+<div class="modal-overlay" id="ticketModal">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTicketTitle">Chamado #0001</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px" id="modalTicketId"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('ticketModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="ticket-detail-meta" id="ticketDetailMeta"></div>
+      <!-- Descrição do problema -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:6px">Descrição do Problema Relatado</div>
+        <div id="ticketDescriptionText" style="font-size:13px;line-height:1.5;color:var(--text);white-space:pre-wrap">—</div>
+      </div>
+      <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:12px;display:flex;align-items:center">
+        <span class="realtime-dot"></span>Chat em tempo real
+      </div>
+      <div class="chat-log" id="chatLog"></div>
+      <!-- Input para envio de mensagem pelo cliente -->
+      <div class="chat-input-area" id="chatInputArea">
+        <textarea id="chatMsgInput" placeholder="Digite sua mensagem..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+        <button class="btn-send" id="btnSendMsg" onclick="sendChatMsg()" title="Enviar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: New Ticket ══ -->
+<div class="modal-overlay" id="newTicketModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Abrir Novo Chamado</div>
+      <button class="modal-close" onclick="closeModal('newTicketModal')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Título <span class="req">*</span></label>
+        <input class="form-input" type="text" id="newTicketTitle" placeholder="Descreva o problema brevemente"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Categoria</label>
+          <select class="form-input form-select" id="newTicketCategory">
+            <option>Rede</option>
+            <option>TI</option>
+            <option>Cloud</option>
+            <option>Website</option>
+            <option>Redes Sociais</option>
+            <option>Tráfego Pago</option>
+            <option>Câmeras</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prioridade</label>
+          <select class="form-input form-select" id="newTicketPriority">
+            <option>Baixa</option>
+            <option selected>Normal</option>
+            <option>Alta</option>
+            <option>Urgente</option>
+          </select>
+        </div>
+      <div class="form-group">
+        <label class="form-label">Descrição detalhada <span class="req">*</span></label>
+        <textarea class="form-input form-textarea" id="newTicketDesc" placeholder="Descreva o problema com detalhes, incluindo quando começou, quais equipamentos estão envolvidos, etc." style="min-height:120px"></textarea>
+      </div>
+      <div id="newTicketMsg" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-top:4px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('newTicketModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitNewTicket()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Enviar Chamado
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media(max-width:900px){.dash-grid{grid-template-columns:1fr!important}}
+  .chat-input-area{display:flex;gap:10px;padding:16px;border-top:1px solid var(--border);background:var(--bg-card)}
+  .chat-input-area textarea{flex:1;background:var(--bg-body);border:1px solid var(--border);border-radius:8px;padding:10px;resize:none;color:var(--text);font-family:inherit;min-height:40px;max-height:120px}
+  .chat-input-area button{background:var(--blue);color:#fff;border:none;padding:0 16px;border-radius:8px;cursor:pointer;transition:0.2s}
+  .chat-input-area button:hover{filter:brightness(1.1)}
+</style>
+
+<script>
+// ── Auth guard ────────────────────────────────────────────────────────
+const _auth    = localStorage.getItem('crm_auth');
+const _expires = parseInt(localStorage.getItem('crm_expires') || '0', 10);
+const SESSION  = JSON.parse(localStorage.getItem('crm_user') || 'null');
+if (!_auth || !SESSION || SESSION.role !== 'client' || Date.now() > _expires) {
+  localStorage.removeItem('crm_auth');
+  localStorage.removeItem('crm_user');
+  localStorage.removeItem('crm_expires');
+  window.location.replace('../index.html');
+}
+
+// ── Sanitização HTML ─────────────────────────────────────────────────
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Ticket store compartilhado (mesmo localStorage do staff) ───────────────
+const TICKET_KEY = 'crm_tickets';
+
+// Limpa dados fictícios antigos do localStorage
+try {
+  const _raw = localStorage.getItem(TICKET_KEY);
+  if (_raw && (_raw.includes('Lentidão no sistema fiscal') || _raw.includes('Queda de internet') || _raw.includes('João Silva'))) {
+    localStorage.removeItem(TICKET_KEY);
+  }
+} catch(e) {}
+
+const SEED_TICKETS = [];
+
+function getTickets() {
+  const raw = localStorage.getItem(TICKET_KEY);
+  if (!raw) {
+    localStorage.setItem(TICKET_KEY, JSON.stringify(SEED_TICKETS));
+    return SEED_TICKETS;
+  }
+  return JSON.parse(raw);
+}
+function saveTickets(tickets) {
+  localStorage.setItem(TICKET_KEY, JSON.stringify(tickets));
+  // Notifica outras abas em tempo real
+  try { bc.postMessage({ type: 'tickets_updated' }); } catch(e) {}
+}
+function getMyTickets() {
+  return getTickets().filter(t => t.client === SESSION.email);
+}
+
+// ── BroadcastChannel (sync em tempo real entre abas) ──────────────────
+let bc;
+try {
+  bc = new BroadcastChannel('crm_realtime');
+  bc.onmessage = (e) => {
+    if (e.data.type === 'tickets_updated') {
+      refreshAll();
+      if (_openTicketId) refreshOpenChat();
+    }
+  };
+} catch(e) { bc = { postMessage: ()=>{} }; }
+
+// Polling como fallback (a cada 2.5s)
+let _lastTicketHash = '';
+setInterval(() => {
+  const raw = localStorage.getItem(TICKET_KEY) || '';
+  if (raw !== _lastTicketHash) {
+    _lastTicketHash = raw;
+    refreshAll();
+    if (_openTicketId) refreshOpenChat();
+  }
+}, 2500);
+
+// ── Populate user info ──────────────────────────────────────────────
+document.getElementById('sidebarAvatar').textContent  = SESSION.avatar || '??';
+document.getElementById('sidebarName').textContent    = SESSION.name;
+document.getElementById('sidebarCompany').textContent = SESSION.company || 'Cliente';
+document.getElementById('headerAvatar').textContent   = SESSION.avatar || '??';
+document.getElementById('profileAvatar').textContent  = SESSION.avatar || '??';
+document.getElementById('profileName').textContent    = SESSION.name;
+document.getElementById('profileCompany').textContent = SESSION.company || '—';
+document.getElementById('profileNameInput').value     = SESSION.name;
+document.getElementById('profileEmailInput').value    = SESSION.email;
+document.getElementById('profileCompanyInput').value  = SESSION.company || '—';
+
+// ── Salvar Nome no Perfil ─────────────────────────────────────────────
+function saveProfileName() {
+  const newName = document.getElementById('profileNameInput').value.trim();
+  const msgEl   = document.getElementById('profileSaveMsg');
+  if (!newName) {
+    msgEl.style.cssText = 'display:block;background:rgba(227,6,19,0.1);border:1px solid rgba(227,6,19,0.3);color:#f87171';
+    msgEl.textContent   = 'Por favor, informe um nome válido.';
+    return;
+  }
+
+  // 1. Atualiza sessão local
+  SESSION.name = newName;
+  const parts = newName.split(' ').filter(Boolean);
+  const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : newName.slice(0, 2).toUpperCase();
+  SESSION.avatar = initials;
+  localStorage.setItem('crm_user', JSON.stringify(SESSION));
+
+  // 2. Atualiza elementos da interface
+  document.getElementById('sidebarName').textContent   = SESSION.name;
+  document.getElementById('sidebarAvatar').textContent = SESSION.avatar;
+  document.getElementById('headerAvatar').textContent  = SESSION.avatar;
+  document.getElementById('profileAvatar').textContent = SESSION.avatar;
+  document.getElementById('profileName').textContent   = SESSION.name;
+
+  // 3. Atualiza no Firebase Cloud para que fique salvo para todos na nuvem
+  if (window.FB && typeof window.FB.updateUserProfile === 'function') {
+    window.FB.updateUserProfile(SESSION.email, { name: newName, avatar: initials })
+      .catch(e => console.error('Erro ao atualizar perfil no Firebase:', e));
+  } else if (window.FB && window.FB.db) {
+    window.FB.db.collection('users').doc(SESSION.email).set({ name: newName, avatar: initials }, { merge: true })
+      .catch(e => console.error('Erro ao salvar no Firestore:', e));
+  }
+
+  msgEl.style.cssText = 'display:block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#34d399';
+  msgEl.textContent   = '✓ Nome alterado e salvo com sucesso!';
+  setTimeout(() => { msgEl.style.display = 'none'; }, 3000);
+}
+
+// ── KPI ────────────────────────────────────────────────────────────────
+function updateKPIs() {
+  const tickets = getMyTickets();
+  const aberto    = tickets.filter(t => t.status === 'Aberto').length;
+  const andamento = tickets.filter(t => t.status === 'Em Andamento').length;
+  const resolvido = tickets.filter(t => t.status === 'Resolvido').length;
+  document.getElementById('kpiAberto').textContent    = aberto;
+  document.getElementById('kpiAndamento').textContent = andamento;
+  document.getElementById('kpiResolvido').textContent = resolvido;
+  const badge = document.getElementById('openBadge');
+  if (aberto + andamento > 0) {
+    badge.textContent = aberto + andamento;
+    badge.style.display = 'inline-flex';
+  } else { badge.style.display = 'none'; }
+}
+
+// ── Recent tickets list ──────────────────────────────────────────────
+function renderRecentTickets() {
+  const tickets = getMyTickets().slice().reverse().slice(0, 5);
+  const list = document.getElementById('recentTicketsList');
+  if (!tickets.length) {
+    list.innerHTML = '<div class="empty-state"><p>Nenhum chamado encontrado.</p></div>';
+    return;
+  }
+  list.innerHTML = tickets.map(t => `
+    <div class="ticket-item" onclick="openTicketModal('${escapeHtml(t.id)}')">
+      <div class="prio-dot ${escapeHtml(t.priority.toLowerCase())}"></div>
+      <div class="ticket-item-info">
+        <div class="ticket-item-title">${escapeHtml(t.title)}</div>
+        <div class="ticket-item-meta">
+          <span>${escapeHtml(t.category)}</span><span>•</span><span>${formatDate(t.date)}</span>
+        </div>
+      </div>
+      <span class="ticket-item-id">#${escapeHtml(t.id)}</span>
+      <span class="badge ${badgeClass(t.status)}">${escapeHtml(t.status)}</span>
+    </div>
+  `).join('');
+}
+
+// ── Tickets table ────────────────────────────────────────────────────────────
+function renderTicketTable() {
+  const search = (document.getElementById('ticketSearch').value || '').toLowerCase();
+  const status = document.getElementById('ticketStatusFilter').value;
+  let tickets = getMyTickets();
+  if (search) tickets = tickets.filter(t =>
+    t.title.toLowerCase().includes(search) || t.category.toLowerCase().includes(search));
+  if (status) tickets = tickets.filter(t => t.status === status);
+  tickets = tickets.slice().reverse();
+  const tbody = document.getElementById('ticketTableBody');
+  if (!tickets.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>Nenhum chamado encontrado.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = tickets.map(t => `
+    <tr>
+      <td class="td-id">#${escapeHtml(t.id)}</td>
+      <td class="td-title">${escapeHtml(t.title)}</td>
+      <td style="color:var(--text-dim)">${escapeHtml(t.category)}</td>
+      <td><span class="badge badge-${escapeHtml(t.priority.toLowerCase())}">${escapeHtml(t.priority)}</span></td>
+      <td style="color:var(--text-dim)">${formatDate(t.date)}</td>
+      <td><span class="badge ${badgeClass(t.status)}">${escapeHtml(t.status)}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openTicketModal('${escapeHtml(t.id)}')">Ver detalhes</button></td>
+    </tr>
+  `).join('');
+}
+
+// ── Chat / Ticket Modal ──────────────────────────────────────────────────
+let _openTicketId = null;
+
+function openTicketModal(id) {
+  _openTicketId = id;
+  _renderTicketModal(id);
+  openModal('ticketModal');
+}
+
+function _renderTicketModal(id) {
+  const tickets = getTickets();
+  const t = tickets.find(t => t.id === id);
+  if (!t) return;
+
+  document.getElementById('modalTicketTitle').textContent = t.title;
+  document.getElementById('modalTicketId').textContent   = `#${t.id} — Aberto em ${formatDate(t.date)}`;
+  document.getElementById('ticketDetailMeta').innerHTML  = `
+    <span class="badge ${badgeClass(t.status)}">${escapeHtml(t.status)}</span>
+    <span class="badge badge-${escapeHtml(t.priority.toLowerCase())}">${escapeHtml(t.priority)}</span>
+    <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--text-dim);border:1px solid var(--border)">${escapeHtml(t.category)}</span>
+  `;
+
+  // Descrição do chamado
+  const desc = t.description || (t.messages && t.messages.length > 0 ? t.messages[0].text : 'Sem descrição informada.');
+  const descEl = document.getElementById('ticketDescriptionText');
+  if (descEl) descEl.textContent = desc;
+
+  const chatLog = document.getElementById('chatLog');
+  if (!t.messages || !t.messages.length) {
+    chatLog.innerHTML = '<div class="chat-empty">Nenhuma mensagem ainda. Envie a primeira!</div>';
+  } else {
+    chatLog.innerHTML = t.messages.map(m => {
+      const isClient = m.from === 'client';
+      return `
+        <div class="msg-bubble ${escapeHtml(m.from)}">
+          <div class="msg-meta">${escapeHtml(m.name || (isClient ? SESSION.name : 'NewTechIT'))} • ${escapeHtml(m.time)}</div>
+          <div class="msg-text">${escapeHtml(m.text)}</div>
+        </div>
+      `;
+    }).join('');
+    // Scroll ao fim
+    setTimeout(() => { chatLog.scrollTop = chatLog.scrollHeight; }, 50);
+  }
+
+  // Habilita input apenas se chamado não estiver resolvido/concluído
+  const closed = ['Resolvido','Concluído'].includes(t.status);
+  const inputArea = document.getElementById('chatInputArea');
+  inputArea.style.display = closed ? 'none' : 'flex';
+  if (!closed) {
+    const inp = document.getElementById('chatMsgInput');
+    inp.value = '';
+    inp.style.height = 'auto';
+    setTimeout(() => inp.focus(), 100);
+  }
+}
+
+function refreshOpenChat() {
+  if (!_openTicketId) return;
+  const chatLog = document.getElementById('chatLog');
+  const wasAtBottom = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < 60;
+  _renderTicketModal(_openTicketId);
+  if (wasAtBottom) setTimeout(() => { chatLog.scrollTop = chatLog.scrollHeight; }, 50);
+}
+
+function sendChatMsg() {
+  const inp = document.getElementById('chatMsgInput');
+  const text = inp.value.trim();
+  if (!text || !_openTicketId) return;
+
+  const tickets = getTickets();
+  const t = tickets.find(t => t.id === _openTicketId);
+  if (!t) return;
+
+  const now = new Date();
+  const time = now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+  const msg = { from: 'client', name: SESSION.name, text, time, ts: Date.now() };
+  t.messages = t.messages || [];
+  t.messages.push(msg);
+  // Se estava fechado, reabre
+  if (t.status === 'Resolvido') t.status = 'Em Andamento';
+  saveTickets(tickets);
+
+  // Sync Cloud Firebase
+  if (window.FB && typeof window.FB.sendMessage === 'function') {
+    window.FB.sendMessage(_openTicketId, text, SESSION, 'client').catch(e => console.error('Firebase sendMessage:', e));
+  }
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  refreshOpenChat();
+  refreshAll();
+}
+
+// ── New Ticket modal ────────────────────────────────────────────────────
+function openNewTicketModal() {
+  document.getElementById('newTicketTitle').value = '';
+  document.getElementById('newTicketDesc').value  = '';
+  document.getElementById('newTicketMsg').style.display = 'none';
+  openModal('newTicketModal');
+}
+
+function submitNewTicket() {
+  const title = document.getElementById('newTicketTitle').value.trim();
+  const desc  = document.getElementById('newTicketDesc').value.trim();
+  const msgEl = document.getElementById('newTicketMsg');
+  if (!title || !desc) {
+    msgEl.style.cssText = 'display:block;background:rgba(227,6,19,0.1);border:1px solid rgba(227,6,19,0.3);color:#f87171;padding:10px 14px;border-radius:8px;font-size:13px';
+    msgEl.textContent = 'Preencha título e descrição.';
+    return;
+  }
+  const tickets = getTickets();
+  const now = new Date();
+  const time = now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  const newId = String(Date.now()).slice(-6); // ID único baseado em timestamp
+  const ticket = {
+    id: newId,
+    title,
+    client: SESSION.email,
+    clientName: SESSION.name,
+    company: SESSION.company || '',
+    category: document.getElementById('newTicketCategory').value,
+    priority: document.getElementById('newTicketPriority').value,
+    status: 'Aberto',
+    date: now.toISOString().split('T')[0],
+    messages: [
+      { from:'client', name: SESSION.name, text: desc, time, ts: Date.now() }
+    ]
+  };
+  tickets.push(ticket);
+  saveTickets(tickets);
+
+  // Sync Cloud Firebase
+  if (window.FB && typeof window.FB.createTicket === 'function') {
+    window.FB.createTicket({
+      title,
+      description: desc,
+      category: document.getElementById('newTicketCategory').value,
+      priority: document.getElementById('newTicketPriority').value,
+      status: 'Aberto',
+      messages: [{ from: 'client', name: SESSION.name, text: desc, time, ts: Date.now() }]
+    }, SESSION).catch(e => console.error('Firebase createTicket:', e));
+  }
+
+  msgEl.style.cssText = 'display:block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#34d399;padding:10px 14px;border-radius:8px;font-size:13px';
+  msgEl.textContent = '✓ Chamado #' + newId + ' aberto com sucesso! Aguarde o retorno da equipe.';
+  setTimeout(() => { closeModal('newTicketModal'); refreshAll(); }, 1800);
+}
+
+// ── Modal utils ──────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'ticketModal') _openTicketId = null;
+}
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      overlay.classList.remove('open');
+      _openTicketId = null;
+    }
+  });
+});
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+const TABS = { dashboard:'Dashboard', tickets:'Meus Chamados', contracts:'Serviços & Contrato', profile:'Meu Perfil' };
+function navigate(tab) {
+  document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+  document.getElementById('headerTitle').textContent = TABS[tab] || 'Dashboard';
+  closeSidebar();
+  if (tab === 'tickets') renderTicketTable();
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────
+function logout() {
+  localStorage.removeItem('crm_auth');
+  localStorage.removeItem('crm_user');
+  window.location.href = '../index.html';
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function formatDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function badgeClass(status) {
+  const map = {
+    'Aberto':'badge-aberto',
+    'Em Andamento':'badge-andamento',
+    'Em Revisão':'badge-revisao',
+    'Resolvido':'badge-resolvido',
+    'Concluído':'badge-concluido',
+    'A Fazer':'badge-afazer'
+  };
+  return map[status] || 'badge-aberto';
+}
+
+function refreshAll() {
+  updateKPIs();
+  renderRecentTickets();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+refreshAll();
+</script>
+<!-- ── Firebase SDK Cloud Realtime Database ── -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script type="module">
+  import FIREBASE_CONFIG from '../firebase-config.js';
+  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }
+</script>
+<script src="../firebase-db.js"></script>
+<script>
+  // ── Firebase Realtime Cloud Listener Hook ──
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.FB && typeof window.FB.onTicketsChange === 'function') {
+      window.FB.onTicketsChange((cloudTickets) => {
+        if (cloudTickets && cloudTickets.length > 0) {
+          localStorage.setItem(TICKET_KEY, JSON.stringify(cloudTickets));
+          refreshAll();
+          if (_openTicketId) refreshOpenChat();
+        }
+      }, SESSION.email);
+    }
+  });
+</script>
+</body>
+</html>

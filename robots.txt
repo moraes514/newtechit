@@ -1,0 +1,12 @@
+# robots.txt — NewTechIT Brasil
+# https://newtechitbrasil.com/robots.txt
+
+User-agent: *
+# Permite rastreamento do site público
+Allow: /
+
+# Bloqueia área interna do CRM
+Disallow: /crm/
+
+# Sitemap
+Sitemap: https://newtechitbrasil.com/sitemap.xml
