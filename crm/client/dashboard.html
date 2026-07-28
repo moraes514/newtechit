@@ -752,7 +752,11 @@ function saveTickets(tickets) {
   try { bc.postMessage({ type: 'tickets_updated' }); } catch(e) {}
 }
 function getMyTickets() {
-  return getTickets().filter(t => t.client === SESSION.email);
+  return getTickets().filter(t => 
+    t.client === SESSION.email || 
+    t.clientEmail === SESSION.email || 
+    (SESSION.company && t.company === SESSION.company)
+  );
 }
 
 // ── BroadcastChannel (sync em tempo real entre abas) ──────────────────
@@ -1115,24 +1119,21 @@ refreshAll();
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script type="module">
-  import FIREBASE_CONFIG from '../firebase-config.js';
-  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(FIREBASE_CONFIG);
-  }
-</script>
+<script src="../firebase-config.js"></script>
 <script src="../firebase-db.js"></script>
 <script>
   // ── Firebase Realtime Cloud Listener Hook ──
   window.addEventListener('DOMContentLoaded', () => {
     if (window.FB && typeof window.FB.onTicketsChange === 'function') {
       window.FB.onTicketsChange((cloudTickets) => {
-        if (cloudTickets && cloudTickets.length > 0) {
+        if (Array.isArray(cloudTickets)) {
           localStorage.setItem(TICKET_KEY, JSON.stringify(cloudTickets));
           refreshAll();
-          if (_openTicketId) refreshOpenChat();
+          if (typeof _openTicketId !== 'undefined' && _openTicketId && typeof refreshOpenChat === 'function') {
+            refreshOpenChat();
+          }
         }
-      }, SESSION.email);
+      });
     }
   });
 </script>

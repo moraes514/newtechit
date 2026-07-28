@@ -9,42 +9,51 @@
 // Exporta funções para uso global nas páginas
 window.FB = (() => {
 
-  // ── Referências Firestore ───────────────────────────────────────────────
-  const db   = firebase.firestore();
-  const auth = firebase.auth();
+  function initFirebase() {
+    if (typeof firebase !== 'undefined' && !firebase.apps.length && window.FIREBASE_CONFIG) {
+      firebase.initializeApp(window.FIREBASE_CONFIG);
+    }
+  }
+
+  function getDb() {
+    initFirebase();
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+    return firebase.firestore();
+  }
+
+  function getAuth() {
+    initFirebase();
+    if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+    return firebase.auth();
+  }
 
   // ══════════════════════════════════════════════════════════════════════
   //  AUTENTICAÇÃO
   // ══════════════════════════════════════════════════════════════════════
 
-  /**
-   * Login com email/senha via Firebase Auth
-   * @returns {Promise<{uid, email, role, name, avatar, company, plan}>}
-   */
   async function loginUser(email, password) {
+    const auth = getAuth();
+    const db   = getDb();
+    if (!auth || !db) throw new Error('Firebase não inicializado.');
     const cred = await auth.signInWithEmailAndPassword(email, password);
     const uid  = cred.user.uid;
-    // Busca perfil do usuário no Firestore
     const snap = await db.collection('users').doc(uid).get();
     if (!snap.exists) throw new Error('Perfil de usuário não encontrado.');
     return { uid, email, ...snap.data() };
   }
 
-  /**
-   * Logout do Firebase Auth
-   */
   async function logoutUser() {
-    await auth.signOut();
+    const auth = getAuth();
+    if (auth) await auth.signOut();
   }
 
-  /**
-   * Observa mudança de estado de autenticação
-   * @param {Function} callback - chamado com (user|null)
-   */
   function onAuthChange(callback) {
+    const auth = getAuth();
+    if (!auth) { callback(null); return () => {}; }
     return auth.onAuthStateChanged(async (firebaseUser) => {
       if (!firebaseUser) { callback(null); return; }
       try {
+        const db   = getDb();
         const snap = await db.collection('users').doc(firebaseUser.uid).get();
         if (snap.exists) {
           callback({ uid: firebaseUser.uid, email: firebaseUser.email, ...snap.data() });
@@ -58,11 +67,10 @@ window.FB = (() => {
     });
   }
 
-  /**
-   * Atualiza perfil do usuário no Firestore
-   */
   async function updateUserProfile(email, data) {
     try {
+      const db = getDb();
+      if (!db) return;
       const snap = await db.collection('users').where('email', '==', email).get();
       const batch = db.batch();
       if (!snap.empty) {
@@ -83,54 +91,55 @@ window.FB = (() => {
   //  TICKETS (CHAMADOS)
   // ══════════════════════════════════════════════════════════════════════
 
-  /**
-   * Busca todos os tickets do Firestore (uma vez)
-   */
   async function getTickets() {
+    const db = getDb();
+    if (!db) return [];
     const snap = await db.collection('tickets').orderBy('createdAt', 'desc').get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return snap.docs.map(d => ({ ...d.data(), id: d.id }));
   }
 
-  /**
-   * Busca tickets de uma empresa específica
-   */
   async function getTicketsByCompany(company) {
+    const db = getDb();
+    if (!db) return [];
     const snap = await db.collection('tickets')
       .where('company', '==', company)
       .orderBy('createdAt', 'desc')
       .get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return snap.docs.map(d => ({ ...d.data(), id: d.id }));
   }
 
-  /**
-   * Busca tickets de um cliente (por email)
-   */
   async function getTicketsByClient(clientEmail) {
+    const db = getDb();
+    if (!db) return [];
     const snap = await db.collection('tickets')
       .where('clientEmail', '==', clientEmail)
       .orderBy('createdAt', 'desc')
       .get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return snap.docs.map(d => ({ ...d.data(), id: d.id }));
   }
 
-  /**
-   * Observa tickets em tempo real (para staff - todos os tickets)
-   */
   function onTicketsChange(callback, filterEmail = null) {
+    const db = getDb();
+    if (!db) return () => {};
     let query = db.collection('tickets').orderBy('createdAt', 'desc');
     if (filterEmail) query = query.where('clientEmail', '==', filterEmail);
     return query.onSnapshot(snap => {
-      const tickets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const tickets = snap.docs.map(d => {
+        const data = d.data();
+        return {
+          ...data,
+          id: d.id,
+          ticketNum: data.ticketNum || d.id
+        };
+      });
       callback(tickets);
     }, err => console.error('onTicketsChange error:', err));
   }
 
-  /**
-   * Cria um novo ticket
-   */
   async function createTicket(data, session) {
+    const db = getDb();
+    if (!db) return null;
     const now = firebase.firestore.Timestamp.now();
-    // Gera ID sequencial baseado em count
     const countSnap = await db.collection('_meta').doc('ticketCount').get();
     const count = countSnap.exists ? (countSnap.data().count || 0) : 0;
     const newCount = count + 1;
@@ -142,11 +151,11 @@ window.FB = (() => {
       ticketNum:   newId,
       title:       data.title,
       description: data.description || '',
-      clientEmail: data.clientEmail || session.email,
-      clientName:  data.clientName  || session.name,
+      clientEmail: data.clientEmail || session.email || '',
+      clientName:  data.clientName  || session.name || '',
       company:     data.company     || session.company || '',
-      category:    data.category,
-      priority:    data.priority,
+      category:    data.category || 'Geral',
+      priority:    data.priority || 'Média',
       status:      data.status || 'Aberto',
       assignee:    data.assignee || null,
       createdAt:   now,
@@ -156,63 +165,94 @@ window.FB = (() => {
     };
 
     const ref = await db.collection('tickets').add(ticket);
-    return { id: ref.id, ticketNum: newId, ...ticket };
+    return { ...ticket, id: ref.id };
   }
 
-  /**
-   * Atualiza status e responsável de um ticket
-   */
   async function updateTicketStatus(ticketId, status, assignee) {
-    const update = {
-      status,
-      updatedAt: firebase.firestore.Timestamp.now()
-    };
-    if (assignee !== undefined) update.assignee = assignee;
-    if (status === 'Resolvido' || status === 'Concluído') {
-      update.resolvedAt = firebase.firestore.Timestamp.now();
+    const db = getDb();
+    if (!db) return;
+    try {
+      const update = {
+        status,
+        updatedAt: firebase.firestore.Timestamp.now()
+      };
+      if (assignee !== undefined) update.assignee = assignee;
+      if (status === 'Resolvido' || status === 'Concluído') {
+        update.resolvedAt = firebase.firestore.Timestamp.now();
+      }
+      const docRef = db.collection('tickets').doc(ticketId);
+      const snap = await docRef.get();
+      if (snap.exists) {
+        await docRef.update(update);
+      } else {
+        const querySnap = await db.collection('tickets').where('id', '==', ticketId).get();
+        if (!querySnap.empty) {
+          await querySnap.docs[0].ref.update(update);
+        }
+      }
+    } catch(e) {
+      console.error('Error updateTicketStatus:', e);
     }
-    await db.collection('tickets').doc(ticketId).update(update);
   }
 
-  /**
-   * Envia mensagem em um ticket (chat em tempo real)
-   */
   async function sendMessage(ticketId, text, session, fromRole) {
-    const now  = new Date();
-    const time = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    const msg  = {
-      from:  fromRole, // 'client' ou 'staff'
-      name:  session.name,
-      email: session.email,
-      text,
-      time,
-      ts: firebase.firestore.Timestamp.now()
-    };
-    await db.collection('tickets').doc(ticketId).update({
-      messages:  firebase.firestore.FieldValue.arrayUnion(msg),
-      updatedAt: firebase.firestore.Timestamp.now()
-    });
+    const db = getDb();
+    if (!db) return;
+    try {
+      const now  = new Date();
+      const time = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      const msg  = {
+        from:  fromRole,
+        name:  session.name,
+        email: session.email,
+        text,
+        time,
+        ts: Date.now()
+      };
+      const docRef = db.collection('tickets').doc(ticketId);
+      const snap = await docRef.get();
+      if (snap.exists) {
+        await docRef.update({
+          messages: firebase.firestore.FieldValue.arrayUnion(msg),
+          updatedAt: firebase.firestore.Timestamp.now()
+        });
+      } else {
+        const querySnap = await db.collection('tickets').where('id', '==', ticketId).get();
+        if (!querySnap.empty) {
+          await querySnap.docs[0].ref.update({
+            messages: firebase.firestore.FieldValue.arrayUnion(msg),
+            updatedAt: firebase.firestore.Timestamp.now()
+          });
+        }
+      }
+    } catch(e) {
+      console.error('Error sendMessage:', e);
+    }
   }
 
-  /**
-   * Observa mensagens de um ticket em tempo real
-   */
-  function onTicketMessages(ticketId, callback) {
-    return db.collection('tickets').doc(ticketId).onSnapshot(snap => {
-      if (!snap.exists) return;
-      const data = snap.data();
-      callback(data.messages || [], data);
-    });
-  }
-
-  /**
-   * Move ticket de coluna (Kanban drag & drop)
-   */
   async function moveTicketStatus(ticketId, newStatus) {
-    await db.collection('tickets').doc(ticketId).update({
-      status:    newStatus,
-      updatedAt: firebase.firestore.Timestamp.now()
-    });
+    const db = getDb();
+    if (!db) return;
+    try {
+      const docRef = db.collection('tickets').doc(ticketId);
+      const snap = await docRef.get();
+      if (snap.exists) {
+        await docRef.update({
+          status: newStatus,
+          updatedAt: firebase.firestore.Timestamp.now()
+        });
+      } else {
+        const querySnap = await db.collection('tickets').where('id', '==', ticketId).get();
+        if (!querySnap.empty) {
+          await querySnap.docs[0].ref.update({
+            status: newStatus,
+            updatedAt: firebase.firestore.Timestamp.now()
+          });
+        }
+      }
+    } catch(e) {
+      console.error('Error moveTicketStatus:', e);
+    }
   }
 
   // ══════════════════════════════════════════════════════════════════════

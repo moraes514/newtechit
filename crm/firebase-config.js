@@ -12,4 +12,7 @@ const FIREBASE_CONFIG = {
   measurementId:     "G-N3SS2GPMCY"
 };
 
-export default FIREBASE_CONFIG;
+if (typeof window !== 'undefined') {
+  window.FIREBASE_CONFIG = FIREBASE_CONFIG;
+}
+

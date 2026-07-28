@@ -1568,10 +1568,15 @@ function onDragLeave(e) {
 function onDrop(e, colId) {
   e.preventDefault();
   document.querySelectorAll('.kanban-cards').forEach(c => c.classList.remove('drag-over'));
-  if (!draggedId) return;
   const tickets = getTickets();
   const t = tickets.find(x => x.id === draggedId);
-  if (t) { t.status = colId; saveTickets(tickets); }
+  if (t) {
+    t.status = colId;
+    saveTickets(tickets);
+    if (window.FB && typeof window.FB.moveTicketStatus === 'function') {
+      window.FB.moveTicketStatus(t.id, colId).catch(e => console.error(e));
+    }
+  }
   draggedId = null;
   renderKanban();
   updateKPIs();
@@ -2357,22 +2362,19 @@ if (SESSION.role === 'admin') {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script type="module">
-  import FIREBASE_CONFIG from '../firebase-config.js';
-  if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-    firebase.initializeApp(FIREBASE_CONFIG);
-  }
-</script>
+<script src="../firebase-config.js"></script>
 <script src="../firebase-db.js"></script>
 <script>
   // ── Firebase Realtime Cloud Listener Hook ──
   window.addEventListener('DOMContentLoaded', () => {
     if (window.FB && typeof window.FB.onTicketsChange === 'function') {
       window.FB.onTicketsChange((cloudTickets) => {
-        if (cloudTickets && cloudTickets.length > 0) {
+        if (Array.isArray(cloudTickets)) {
           localStorage.setItem('crm_tickets', JSON.stringify(cloudTickets));
-          if (typeof refreshAll === 'function') refreshAll();
-          if (typeof refreshKanban === 'function') refreshKanban();
+          if (typeof updateKPIs === 'function') updateKPIs();
+          if (typeof renderKanban === 'function') renderKanban();
+          if (typeof renderStaffTicketTable === 'function') renderStaffTicketTable();
+          if (typeof renderActivity === 'function') renderActivity();
         }
       });
     }
