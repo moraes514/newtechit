@@ -1128,10 +1128,12 @@ refreshAll();
 <script src="../firebase-db.js"></script>
 <script>
   // ── Firebase Realtime Cloud Listener Hook ──
-  window.addEventListener('DOMContentLoaded', () => {
+  function initCloudSync() {
     if (window.FB && typeof window.FB.onTicketsChange === 'function') {
+      console.log('🚀 Conectando ouvinte em tempo real no Client Dashboard...');
       window.FB.onTicketsChange((cloudTickets) => {
         if (Array.isArray(cloudTickets)) {
+          console.log('📥 Recebidos do Firebase Cloud (Cliente):', cloudTickets.length, 'chamado(s)');
           localStorage.setItem(TICKET_KEY, JSON.stringify(cloudTickets));
           refreshAll();
           if (typeof _openTicketId !== 'undefined' && _openTicketId && typeof refreshOpenChat === 'function') {
@@ -1140,7 +1142,13 @@ refreshAll();
         }
       });
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCloudSync);
+  } else {
+    initCloudSync();
+  }
 </script>
 </body>
 </html>

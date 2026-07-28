@@ -175,12 +175,16 @@ window.FB = (() => {
     const db = getDb();
     if (!db) return null;
     const now = firebase.firestore.Timestamp.now();
-    const countSnap = await db.collection('_meta').doc('ticketCount').get();
-    const count = countSnap.exists ? (countSnap.data().count || 0) : 0;
-    const newCount = count + 1;
-    const newId    = String(newCount).padStart(4, '0');
-
-    await db.collection('_meta').doc('ticketCount').set({ count: newCount });
+    let newId = String(Date.now()).slice(-4);
+    try {
+      const countSnap = await db.collection('_meta').doc('ticketCount').get();
+      const count = countSnap.exists ? (countSnap.data().count || 0) : 0;
+      const newCount = count + 1;
+      newId = String(newCount).padStart(4, '0');
+      await db.collection('_meta').doc('ticketCount').set({ count: newCount });
+    } catch(e) {
+      console.warn('⚠️ Meta count warning (usando ID fallback):', e);
+    }
 
     const ticket = {
       ticketNum:   newId,
