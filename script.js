@@ -218,20 +218,51 @@ function handleFormSubmit(e) {
   const btn = document.getElementById('submitBtn');
   const success = document.getElementById('formSuccess');
 
-  btn.textContent = 'Enviando...';
-  btn.disabled = true;
+  const name = document.getElementById('name')?.value.trim() || 'Não informado';
+  const company = document.getElementById('company')?.value.trim() || 'Não informada';
+  const email = document.getElementById('email')?.value.trim() || 'Não informado';
+  const phone = document.getElementById('phone')?.value.trim() || 'Não informado';
+  const serviceEl = document.getElementById('service');
+  const serviceValue = serviceEl?.value || '';
+  const serviceText = serviceEl?.options[serviceEl?.selectedIndex]?.text || 'Serviço Geral';
+  const message = document.getElementById('message')?.value.trim() || 'Sem mensagem adicional';
 
-  // Simulate form submission
+  if (btn) {
+    btn.textContent = 'Redirecionando...';
+    btn.disabled = true;
+  }
+
+  // Número padrão da NewTechIT (Geral / Suporte / TI)
+  let phoneTarget = '5511992864902';
+  
+  // Se for CFTV / Câmeras, envia para o número especializado do responsável (11973963787)
+  if (serviceValue === 'cameras') {
+    phoneTarget = '5511973963787';
+  }
+
+  const wppText = `Olá! Solicitação de consultoria via site:\n\n` +
+    `*Nome:* ${name}\n` +
+    `*Empresa:* ${company}\n` +
+    `*E-mail:* ${email}\n` +
+    `*Telefone:* ${phone}\n` +
+    `*Serviço:* ${serviceText}\n\n` +
+    `*Mensagem:* ${message}`;
+
+  const wppUrl = `https://wa.me/${phoneTarget}?text=${encodeURIComponent(wppText)}`;
+  window.open(wppUrl, '_blank', 'noopener,noreferrer');
+
   setTimeout(() => {
-    btn.textContent = 'Solicitar Consultoria Gratuita';
-    btn.disabled = false;
-    success.style.display = 'block';
+    if (btn) {
+      btn.textContent = 'Solicitar Consultoria Gratuita';
+      btn.disabled = false;
+    }
+    if (success) success.style.display = 'block';
     e.target.reset();
 
     setTimeout(() => {
-      success.style.display = 'none';
+      if (success) success.style.display = 'none';
     }, 5000);
-  }, 1500);
+  }, 1000);
 }
 
 // ===== SMOOTH SECTION TRANSITIONS =====
