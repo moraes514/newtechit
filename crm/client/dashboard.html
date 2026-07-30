@@ -988,9 +988,10 @@ function sendChatMsg() {
   if (t.status === 'Resolvido') t.status = 'Em Andamento';
   saveTickets(tickets);
 
-  // Sync Cloud Firebase
+  // Sync Cloud Firebase (inclui mudança de status se o chamado foi reaberto)
   if (window.FB && typeof window.FB.sendMessage === 'function') {
-    window.FB.sendMessage(_openTicketId, text, SESSION, 'client').catch(e => console.error('Firebase sendMessage:', e));
+    const statusChanged = (t.status === 'Em Andamento') ? 'Em Andamento' : undefined;
+    window.FB.sendMessage(_openTicketId, text, SESSION, 'client', statusChanged).catch(e => console.error('Firebase sendMessage:', e));
   }
 
   inp.value = '';
@@ -1016,46 +1017,53 @@ function submitNewTicket() {
     msgEl.textContent = 'Preencha título e descrição.';
     return;
   }
-  const tickets = getTickets();
   const now = new Date();
   const time = now.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
-  const newId = String(Date.now()).slice(-6); // ID único baseado em timestamp
-  const ticket = {
-    id: newId,
+  const tempId = 'tmp_' + Date.now();
+  const ticketData = {
     title,
-    client: SESSION.email,
-    clientName: SESSION.name,
-    company: SESSION.company || '',
+    description: desc,
     category: document.getElementById('newTicketCategory').value,
     priority: document.getElementById('newTicketPriority').value,
     status: 'Aberto',
-    date: now.toISOString().split('T')[0],
-    messages: [
-      { from:'client', name: SESSION.name, text: desc, time, ts: Date.now() }
-    ]
+    clientEmail: SESSION.email || '',
+    clientName: SESSION.name || '',
+    company: SESSION.company || '',
+    messages: [{ from: 'client', name: SESSION.name, text: desc, time, ts: Date.now() }]
   };
-  tickets.push(ticket);
+  // Salva localmente com ID temporário enquanto Firebase processa
+  const tickets = getTickets();
+  tickets.push({
+    id: tempId,
+    client: SESSION.email,
+    clientName: SESSION.name,
+    company: SESSION.company || '',
+    date: now.toISOString().split('T')[0],
+    ...ticketData
+  });
   saveTickets(tickets);
 
-  // Sync Cloud Firebase
+  // Sync Cloud Firebase — o onTicketsChange vai substituir o ticket temporário pelo real
   if (window.FB && typeof window.FB.createTicket === 'function') {
-    window.FB.createTicket({
-      title,
-      description: desc,
-      category: document.getElementById('newTicketCategory').value,
-      priority: document.getElementById('newTicketPriority').value,
-      status: 'Aberto',
-      clientEmail: SESSION.email || '',
-      clientName: SESSION.name || '',
-      company: SESSION.company || '',
-      messages: [{ from: 'client', name: SESSION.name, text: desc, time, ts: Date.now() }]
-    }, SESSION)
-    .then(res => console.log('✅ Ticket do Cliente criado no Firebase:', res))
+    window.FB.createTicket(ticketData, SESSION)
+    .then(res => {
+      console.log('✅ Ticket do Cliente criado no Firebase:', res);
+      // Substitui ID temporário pelo ID real do Firestore
+      if (res && res.id) {
+        const currentTickets = getTickets();
+        const tmpIdx = currentTickets.findIndex(t => t.id === tempId);
+        if (tmpIdx !== -1) {
+          currentTickets[tmpIdx].id = res.id;
+          currentTickets[tmpIdx].ticketNum = res.ticketNum || res.id;
+          saveTickets(currentTickets);
+        }
+      }
+    })
     .catch(e => console.error('❌ Erro no Firebase createTicket:', e));
   }
 
   msgEl.style.cssText = 'display:block;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#34d399;padding:10px 14px;border-radius:8px;font-size:13px';
-  msgEl.textContent = '✓ Chamado #' + newId + ' aberto com sucesso! Aguarde o retorno da equipe.';
+  msgEl.textContent = '✓ Chamado aberto com sucesso! Aguarde o retorno da equipe.';
   setTimeout(() => { closeModal('newTicketModal'); refreshAll(); }, 1800);
 }
 
@@ -1142,6 +1150,7 @@ refreshAll();
       window.FB.onTicketsChange((cloudTickets) => {
         if (Array.isArray(cloudTickets)) {
           console.log('📥 Recebidos do Firebase Cloud (Cliente):', cloudTickets.length, 'chamado(s)');
+          // Dados já vêm normalizados do firebase-db.js (com id, client, date, etc.)
           localStorage.setItem(TICKET_KEY, JSON.stringify(cloudTickets));
           refreshAll();
           if (typeof _openTicketId !== 'undefined' && _openTicketId && typeof refreshOpenChat === 'function') {
@@ -1149,6 +1158,8 @@ refreshAll();
           }
         }
       });
+    } else {
+      console.warn('⚠️ Firebase não disponível — operando apenas em modo local.');
     }
   }
 

@@ -51,6 +51,50 @@ window.FB = (() => {
   }
 
   // ══════════════════════════════════════════════════════════════════════
+  //  HELPER: Normalizar ticket do Firestore para formato local esperado
+  //  Converte campos do Firestore → formato que as dashboards entendem
+  // ══════════════════════════════════════════════════════════════════════
+
+  function normalizeTicket(data, docId) {
+    // Converter createdAt (Firestore Timestamp ou ISO string) → date (YYYY-MM-DD)
+    let dateStr = '';
+    if (data.createdAt) {
+      try {
+        const dt = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+        dateStr = dt.toISOString().split('T')[0];
+      } catch(e) {
+        dateStr = data.date || '';
+      }
+    } else {
+      dateStr = data.date || '';
+    }
+
+    return {
+      // Usa o Document ID do Firestore como ID canônico
+      id:          docId,
+      // ticketNum mantém para exibição legível (#0001)
+      ticketNum:   data.ticketNum || docId,
+      title:       data.title || '',
+      // 'client' é usado pela UI do staff para exibir nome do cliente
+      client:      data.clientName || data.client || data.clientEmail || '',
+      clientName:  data.clientName || data.client || '',
+      clientEmail: data.clientEmail || data.client || '',
+      company:     data.company || '',
+      description: data.description || '',
+      category:    data.category || 'Geral',
+      priority:    data.priority || 'Média',
+      status:      data.status || 'Aberto',
+      date:        dateStr,
+      assignee:    data.assignee || null,
+      messages:    data.messages || [],
+      // Manter campos originais do Firestore para referência
+      createdAt:   data.createdAt || null,
+      updatedAt:   data.updatedAt || null,
+      resolvedAt:  data.resolvedAt || null
+    };
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
   //  AUTENTICAÇÃO
   // ══════════════════════════════════════════════════════════════════════
 
@@ -118,7 +162,7 @@ window.FB = (() => {
     const db = getDb();
     if (!db) return [];
     const snap = await db.collection('tickets').get();
-    const tickets = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    const tickets = snap.docs.map(d => normalizeTicket(d.data(), d.id));
     tickets.sort((a, b) => {
       const getTs = x => (x.createdAt?.seconds ? x.createdAt.seconds * 1000 : (x.createdAt ? new Date(x.createdAt).getTime() : 0));
       return getTs(b) - getTs(a);
@@ -130,7 +174,7 @@ window.FB = (() => {
     const db = getDb();
     if (!db) return [];
     const snap = await db.collection('tickets').get();
-    const tickets = snap.docs.map(d => ({ ...d.data(), id: d.id })).filter(t => t.company === company);
+    const tickets = snap.docs.map(d => normalizeTicket(d.data(), d.id)).filter(t => t.company === company);
     return tickets;
   }
 
@@ -138,7 +182,7 @@ window.FB = (() => {
     const db = getDb();
     if (!db) return [];
     const snap = await db.collection('tickets').get();
-    const tickets = snap.docs.map(d => ({ ...d.data(), id: d.id })).filter(t => t.clientEmail === clientEmail || t.client === clientEmail);
+    const tickets = snap.docs.map(d => normalizeTicket(d.data(), d.id)).filter(t => t.clientEmail === clientEmail || t.client === clientEmail);
     return tickets;
   }
 
@@ -147,14 +191,7 @@ window.FB = (() => {
     if (!db) return () => {};
     let query = db.collection('tickets');
     return query.onSnapshot(snap => {
-      let tickets = snap.docs.map(d => {
-        const data = d.data();
-        return {
-          ...data,
-          id: d.id,
-          ticketNum: data.ticketNum || d.id
-        };
-      });
+      let tickets = snap.docs.map(d => normalizeTicket(d.data(), d.id));
 
       if (filterEmail) {
         tickets = tickets.filter(t => t.clientEmail === filterEmail || t.client === filterEmail);
@@ -204,7 +241,8 @@ window.FB = (() => {
     };
 
     const ref = await db.collection('tickets').add(ticket);
-    return { ...ticket, id: ref.id };
+    // Retorna o ticket normalizado com o ID real do Firestore
+    return normalizeTicket(ticket, ref.id);
   }
 
   async function updateTicketStatus(ticketId, status, assignee) {
@@ -224,9 +262,12 @@ window.FB = (() => {
       if (snap.exists) {
         await docRef.update(update);
       } else {
-        const querySnap = await db.collection('tickets').where('id', '==', ticketId).get();
+        // Fallback: busca por ticketNum para compatibilidade
+        const querySnap = await db.collection('tickets').where('ticketNum', '==', ticketId).get();
         if (!querySnap.empty) {
           await querySnap.docs[0].ref.update(update);
+        } else {
+          console.warn('⚠️ Ticket não encontrado no Firebase para atualizar status:', ticketId);
         }
       }
     } catch(e) {
@@ -234,7 +275,7 @@ window.FB = (() => {
     }
   }
 
-  async function sendMessage(ticketId, text, session, fromRole) {
+  async function sendMessage(ticketId, text, session, fromRole, newStatus) {
     const db = getDb();
     if (!db) return;
     try {
@@ -248,20 +289,28 @@ window.FB = (() => {
         time,
         ts: Date.now()
       };
+
+      const updateData = {
+        messages: firebase.firestore.FieldValue.arrayUnion(msg),
+        updatedAt: firebase.firestore.Timestamp.now()
+      };
+
+      // Se um novo status foi fornecido, atualiza junto com a mensagem
+      if (newStatus) {
+        updateData.status = newStatus;
+      }
+
       const docRef = db.collection('tickets').doc(ticketId);
       const snap = await docRef.get();
       if (snap.exists) {
-        await docRef.update({
-          messages: firebase.firestore.FieldValue.arrayUnion(msg),
-          updatedAt: firebase.firestore.Timestamp.now()
-        });
+        await docRef.update(updateData);
       } else {
-        const querySnap = await db.collection('tickets').where('id', '==', ticketId).get();
+        // Fallback: busca por ticketNum para compatibilidade
+        const querySnap = await db.collection('tickets').where('ticketNum', '==', ticketId).get();
         if (!querySnap.empty) {
-          await querySnap.docs[0].ref.update({
-            messages: firebase.firestore.FieldValue.arrayUnion(msg),
-            updatedAt: firebase.firestore.Timestamp.now()
-          });
+          await querySnap.docs[0].ref.update(updateData);
+        } else {
+          console.warn('⚠️ Ticket não encontrado no Firebase para enviar mensagem:', ticketId);
         }
       }
     } catch(e) {
@@ -273,20 +322,24 @@ window.FB = (() => {
     const db = getDb();
     if (!db) return;
     try {
+      const updateData = {
+        status: newStatus,
+        updatedAt: firebase.firestore.Timestamp.now()
+      };
+      if (newStatus === 'Resolvido' || newStatus === 'Concluído') {
+        updateData.resolvedAt = firebase.firestore.Timestamp.now();
+      }
       const docRef = db.collection('tickets').doc(ticketId);
       const snap = await docRef.get();
       if (snap.exists) {
-        await docRef.update({
-          status: newStatus,
-          updatedAt: firebase.firestore.Timestamp.now()
-        });
+        await docRef.update(updateData);
       } else {
-        const querySnap = await db.collection('tickets').where('id', '==', ticketId).get();
+        // Fallback: busca por ticketNum para compatibilidade
+        const querySnap = await db.collection('tickets').where('ticketNum', '==', ticketId).get();
         if (!querySnap.empty) {
-          await querySnap.docs[0].ref.update({
-            status: newStatus,
-            updatedAt: firebase.firestore.Timestamp.now()
-          });
+          await querySnap.docs[0].ref.update(updateData);
+        } else {
+          console.warn('⚠️ Ticket não encontrado no Firebase para mover status:', ticketId);
         }
       }
     } catch(e) {
@@ -299,11 +352,15 @@ window.FB = (() => {
   // ══════════════════════════════════════════════════════════════════════
 
   async function getContracts() {
+    const db = getDb();
+    if (!db) return [];
     const snap = await db.collection('contracts').orderBy('createdAt', 'desc').get();
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 
   async function saveContract(data, editId = null) {
+    const db = getDb();
+    if (!db) return;
     const now = firebase.firestore.Timestamp.now();
     if (editId) {
       await db.collection('contracts').doc(editId).update({ ...data, updatedAt: now });
@@ -313,6 +370,8 @@ window.FB = (() => {
   }
 
   async function markContractPaid(contractId) {
+    const db = getDb();
+    if (!db) return;
     await db.collection('contracts').doc(contractId).update({
       payStatus:   'Pago',
       lastPayment: new Date().toISOString().split('T')[0],
@@ -321,6 +380,8 @@ window.FB = (() => {
   }
 
   async function deleteContract(contractId) {
+    const db = getDb();
+    if (!db) return;
     await db.collection('contracts').doc(contractId).delete();
   }
 
@@ -335,6 +396,8 @@ window.FB = (() => {
    * @param {number} month - 1-12
    */
   async function getMonthlyReport(company, year, month) {
+    const db = getDb();
+    if (!db) return { company: company || 'Todas as Empresas', year, month, total: 0, abertos: 0, andamento: 0, resolvidos: 0, byCat: {}, byPrio: {}, avgResolutionHours: null, tickets: [] };
     let query = db.collection('tickets');
     if (company) query = query.where('company', '==', company);
 
@@ -371,8 +434,8 @@ window.FB = (() => {
     if (resolved.length > 0) {
       const totalMs = resolved.reduce((sum, t) => {
         const created  = t.createdAt?.toDate  ? t.createdAt.toDate()  : new Date(t.createdAt);
-        const resolved = t.resolvedAt?.toDate ? t.resolvedAt.toDate() : new Date(t.resolvedAt);
-        return sum + (resolved - created);
+        const resolvedAt = t.resolvedAt?.toDate ? t.resolvedAt.toDate() : new Date(t.resolvedAt);
+        return sum + (resolvedAt - created);
       }, 0);
       avgResolutionHours = Math.round((totalMs / resolved.length) / 3600000 * 10) / 10;
     }
@@ -391,6 +454,8 @@ window.FB = (() => {
    * Lista todas as empresas cadastradas (de tickets)
    */
   async function getCompanies() {
+    const db = getDb();
+    if (!db) return [];
     const snap = await db.collection('tickets').get();
     const companies = [...new Set(snap.docs.map(d => d.data().company).filter(Boolean))];
     return companies.sort();
@@ -401,6 +466,8 @@ window.FB = (() => {
   // ══════════════════════════════════════════════════════════════════════
 
   async function seedInitialData() {
+    const db = getDb();
+    if (!db) return;
     const metaSnap = await db.collection('_meta').doc('seeded').get();
     if (metaSnap.exists) return; // já semeado
 
@@ -421,15 +488,17 @@ window.FB = (() => {
     // Tickets
     getTickets, getTicketsByCompany, getTicketsByClient,
     onTicketsChange, createTicket, updateTicketStatus,
-    sendMessage, onTicketMessages, moveTicketStatus,
+    sendMessage, moveTicketStatus,
     // Contratos
     getContracts, saveContract, markContractPaid, deleteContract,
     // Relatórios
     getMonthlyReport, getCompanies,
     // Setup
     seedInitialData,
+    // Helper
+    normalizeTicket,
     // Acesso direto ao firestore e auth para casos específicos
-    db, auth
+    getDb, getAuth
   };
 
 })();
