@@ -1249,9 +1249,8 @@ function getAllowedCategories() {
   return null;
 }
 function filterByRole(tickets) {
-  const allowed = getAllowedCategories();
-  if (!allowed) return tickets;
-  return tickets.filter(t => allowed.includes(t.category));
+  // Retorna todos os chamados para que o Kanban e a tabela fiquem coerentes com o Dashboard
+  return tickets;
 }
 
 // ── Initial tickets (vazio para produção) ─────────────────────────
