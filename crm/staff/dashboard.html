@@ -1499,8 +1499,10 @@ let draggedId = null;
 function renderKanban() {
   const tickets = filterByRole(getTickets());
   const board = document.getElementById('kanbanBoard');
+  // Mapeamento de status para colunas do Kanban
+  const statusToCol = { 'Aberto': 'A Fazer', 'Resolvido': 'Concluído' };
   board.innerHTML = COLS.map(col => {
-    const colTickets = tickets.filter(t => t.status === col.id);
+    const colTickets = tickets.filter(t => (statusToCol[t.status] || t.status) === col.id);
     return `
       <div class="kanban-col ${col.cls}">
         <div class="kanban-col-header">
@@ -1970,7 +1972,12 @@ function navigate(tab) {
   document.getElementById('nav-' + tab).classList.add('active');
   document.getElementById('headerTitle').textContent = PAGE_TITLES[tab] || 'Dashboard';
   closeSidebar();
-  if (tab === 'reports') generateMonthlyReport();
+  // Re-renderiza o conteúdo da aba ao navegar
+  if (tab === 'kanban')     renderKanban();
+  if (tab === 'alltickets') { renderStaffTicketTable(); populateClientFilter(); }
+  if (tab === 'clients')    renderClients();
+  if (tab === 'reports')    generateMonthlyReport();
+  if (tab === 'dashboard')  { updateKPIs(); renderActivity(); renderPriorityBars(); }
 }
 
 // ── Sidebar ───────────────────────────────────────────────────────────────
