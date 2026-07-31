@@ -1239,8 +1239,9 @@ function escapeHtml(str) {
 }
 
 // ── Categorias por equipe ─────────────────────────────────────────────────
-const TI_CATS        = ['Rede','TI','Cloud','Câmeras','UDM/Switches','Consultoria'];
-const MARKETING_CATS = ['Website','Redes Sociais','Tráfego Pago','Desenvolvimento de Sistemas'];
+const SHARED_CATS    = ['Geral','Outro'];  // Categorias visíveis para todas as equipes
+const TI_CATS        = ['Rede','TI','Cloud','Câmeras','UDM/Switches','Consultoria', ...SHARED_CATS];
+const MARKETING_CATS = ['Website','Redes Sociais','Tráfego Pago','Desenvolvimento de Sistemas', ...SHARED_CATS];
 function getAllowedCategories() {
   if (SESSION.role === 'admin')           return null; // null = todas
   if (SESSION.role === 'staff_ti')        return TI_CATS;
@@ -1250,7 +1251,7 @@ function getAllowedCategories() {
 function filterByRole(tickets) {
   const allowed = getAllowedCategories();
   if (!allowed) return tickets;
-  return tickets.filter(t => allowed.includes(t.category) || t.category === 'Outro' && SESSION.role === 'admin');
+  return tickets.filter(t => allowed.includes(t.category));
 }
 
 // ── Initial tickets (vazio para produção) ─────────────────────────
